@@ -33,6 +33,7 @@ for modinfo in pkgutil.iter_modules(location_parsers.__path__):
             # match on address field, which should be sufficient
             if location.address == db_loc.get("Address", ""):
                 found = True
+                break
         if not found:
             logging.warning(f'\t{location.name}, {location.address} was not found in database! Please add it manually.')
         else:
