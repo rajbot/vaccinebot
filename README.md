@@ -38,6 +38,15 @@ nice ./crawler.py
 02/06/2021 09:57:42 WARNING 	Moscone Center South not found in database! Please add it.
 ```
 
+Once you add the missing location to the database, you will see this:
+```bash
+02/06/2021 10:10:36 INFO Downloading known locations
+02/06/2021 10:10:37 INFO loaded 6004 locations
+02/06/2021 10:10:37 INFO Parsing San Francisco County
+02/06/2021 10:10:44 INFO 	Found 2 locations
+02/06/2021 10:10:44 INFO 	2 locations already in database
+```
+
 
 # User agent:
 This crawler is run by hand, and not through an automated process, using this user-agent:
