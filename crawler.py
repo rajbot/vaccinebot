@@ -31,7 +31,7 @@ for modinfo in pkgutil.iter_modules(location_parsers.__path__):
         found = False
         for db_loc in db["content"]:
             # match on address field, which should be sufficient
-            if location.address == db_loc.get("Address", ""):
+            if db_loc.get("Address", "").startswith(location.address):
                 found = True
                 break
         if not found:
