@@ -1,0 +1,6 @@
+EasyProcess==0.3
+pkg-resources==0.0.0
+PyVirtualDisplay==2.0
+selenium==3.141.0
+urllib3==1.26.3
+xvfbwrapper==0.2.9
