@@ -3,7 +3,7 @@ from collections import namedtuple
 from selenium.webdriver.chrome.options import Options
 
 chrome_opts = Options()
-chrome_opts.add_argument("user-agent=Vaccinebot https://bitstream.io/vaccinebot)")
+chrome_opts.add_argument("user-agent=Vaccinebot (+https://bitstream.io/vaccinebot)")
 
 chromedriver_path =  os.environ.get("CHROMEDRIVER_PATH")
 

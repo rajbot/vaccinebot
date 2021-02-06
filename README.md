@@ -17,13 +17,30 @@ pip3 install selenium
 
 sudo apt-get install xvfb
 pip3 install wheel
-#pip3 install xvfbwrapper
 pip3 install pyvirtualdisplay
 ```
+
 
 # Run vaccination site crawler
 ```bash
 export CHROMEDRIVER_PATH=/path/to/chromedriver
 killall chrome #kill any old chrome processes that may have hung
 nice ./crawler.py
+```
+
+
+# Output:
+```bash
+02/06/2021 09:57:35 INFO Downloading known locations
+02/06/2021 09:57:36 INFO loaded 6004 locations
+02/06/2021 09:57:36 INFO Parsing San Francisco County
+02/06/2021 09:57:42 INFO 	Found 2 locations
+02/06/2021 09:57:42 WARNING 	Moscone Center South not found in database! Please add it.
+```
+
+
+# User agent:
+This crawler is run by hand, and not through an automated process, using this user-agent:
+```
+Vaccinebot (+https://bitstream.io/vaccinebot)
 ```
