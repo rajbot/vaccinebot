@@ -1,6 +1,8 @@
 # Parse vaccination site locations for San Francisco County
 # TODO: parse nonstandard City Collage location
 
+# Run manually: python3 -m location_parsers.sanfrancisco
+
 import os
 
 from pyvirtualdisplay import Display
@@ -47,7 +49,8 @@ def run():
         location = Location(
             name = name,
             address = address,
-            county = county.name
+            county = county.name,
+            url = None
         )
         locations.append(location)
 
