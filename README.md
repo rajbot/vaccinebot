@@ -57,7 +57,7 @@ nice ./crawler.py
 python3 -m location_parsers.eldorado
 
 # Selenium-based parser
-python3 -m location_parsers.sanfrancisco
+python3 -m location_parsers.mono
 ```
 
 
