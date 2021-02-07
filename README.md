@@ -1,4 +1,4 @@
-# Install on ubuntu 18.04
+# Install on Ubuntu 18.04
 ```bash
 sudo apt-get update
 sudo apt-get install -y libappindicator1 fonts-liberation
@@ -23,7 +23,16 @@ pip3 install beautifulsoup4 lxml
 ```
 
 
-# Run vaccination site crawler
+# Install and run on OS X
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip3 install -r requirements_osx.txt
+./crawler.py
+```
+
+
+# Run vaccination site crawler on Ubuntu 18.04
 ```bash
 killall chrome #kill any old chrome processes that may have hung
 
