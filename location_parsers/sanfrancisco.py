@@ -4,19 +4,65 @@
 # Run manually: python3 -m location_parsers.sanfrancisco
 
 import os
+import re
+import urllib3
+from bs4 import BeautifulSoup
 
-from pyvirtualdisplay import Display
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
-from . import chrome_opts, chromedriver_path
+from . import header_dict
 from . import County, Location
+
 
 county = County(
     name = "San Francisco",
     url = "https://sf.gov/get-vaccinated-against-covid-19"
 )
 
+
+# Returns a list of Location objects
 def run():
+    http = urllib3.PoolManager(headers=header_dict)
+    r = http.request('GET', county.url)
+
+    soup = BeautifulSoup(r.data, 'lxml')
+    locations = []
+
+    sites = soup.find_all("div", class_="sfgov-address")
+
+    for site in sites:
+        title = site.find(class_="sfgov-address__title")
+        name = title.string
+
+        title2 = site.find(class_="sfgov-address__location-name")
+        if title2 is not None:
+            name += f' - {title2.string}'
+
+        if name == "":
+            raise Exception("Could not parse location name")
+
+        address1 = site.find(class_="sfgov-address__line1")
+        address2 = site.find(class_="sfgov-address__city-state-zip")
+        address = ', '.join([address1.string, address2.string])
+
+        if address == "":
+            raise Exception("Could not parse location address")
+
+        locations.append(Location(
+            name = name,
+            address = address,
+            county = county.name,
+            url = None
+        ))
+
+    return locations
+
+
+# Not used for now
+def run_selenium():
+    from . import chrome_opts, chromedriver_path
+    from pyvirtualdisplay import Display
+    from selenium import webdriver
+    from selenium.common.exceptions import NoSuchElementException
+
     display = Display(visible=0, size=(800, 600))
     display.start()
 
