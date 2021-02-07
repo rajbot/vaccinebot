@@ -5,13 +5,8 @@
 import re
 import time
 
-from . import chrome_opts, chromedriver_path
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
-
-from . import header_dict
 from . import County, Location
-
+from . import driver_start, driver_stop
 
 county = County(
     name = "Mono",
@@ -21,7 +16,7 @@ county = County(
 
 # Returns a list of Location objects
 def run():
-    driver = webdriver.Chrome(chromedriver_path, options=chrome_opts)
+    driver, display = driver_start()
     driver.get(county.url)
 
     # Wait for ember.js
@@ -56,7 +51,7 @@ def run():
             url = None
         ))
 
-    driver.close()
+    driver_stop(driver, display)
 
     return locations
 
