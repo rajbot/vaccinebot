@@ -1,7 +1,6 @@
-# Parse vaccination site locations for El Dorado County
-# TODO: parse Safeway Locations
+# Parse vaccination site locations for Imperial County
 
-# Run manually: python3 -m location_parsers.eldorado
+# Run manually: python3 -m location_parsers.imperial
 
 import http
 import re
