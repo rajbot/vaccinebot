@@ -34,14 +34,19 @@ def run():
     for item in locations_list.contents:
         if item.name == 'li':
             # Parse title, split across multiple spans
-            title = "El Dorado "
+            title = ""
             title_spans = item.find_all(style=re.compile("font-weight:bold"))
             for t in title_spans:
                 title += t.string
+
+            if title == "":
+                raise Exception("Could not parse location name")
+
             title = title.rstrip(':')
             # one title is missing whitespace around hyphen
             title = re.sub(r'(\S)-(\S)', r'\1 - \2', title)
             title = title.replace(u'\xa0', u' ')
+            title = "El Dorado " + title
 
             # Parse address
             address = ""
@@ -51,8 +56,11 @@ def run():
                 if s is not None:
                     address += s
                 last_span = last_span.next_sibling
-
             address = address.strip()
+
+            if address == "":
+                raise Exception("Could not parse location address")
+
             address +=", CA"
 
             location = Location(

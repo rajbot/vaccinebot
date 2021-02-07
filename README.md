@@ -25,9 +25,21 @@ pip3 install beautifulsoup4
 
 # Run vaccination site crawler
 ```bash
-export CHROMEDRIVER_PATH=/path/to/chromedriver
 killall chrome #kill any old chrome processes that may have hung
+
+source venv/bin/activate
+export CHROMEDRIVER_PATH=/path/to/chromedriver
+
 nice ./crawler.py
+```
+
+# Manually test a single county parser
+```bash
+# BeautifulSoup-based parser
+python3 -m location_parsers.eldorado
+
+# Selenium-based parser
+python3 -m location_parsers.sanfrancisco
 ```
 
 
