@@ -24,10 +24,18 @@ pip3 install beautifulsoup4 lxml
 
 
 # Install and run on OS X
+
+Make sure you have the Chrome browser installed first.
+
 ```bash
+wget https://chromedriver.storage.googleapis.com/88.0.4324.96/chromedriver_mac64.zip
+unzip chromedriver_mac64.zip
+export CHROMEDRIVER_PATH=/path/to/chromedriver
+
 python3 -m venv venv
 source venv/bin/activate
 pip3 install -r requirements_osx.txt
+
 ./crawler.py
 ```
 
