@@ -34,12 +34,18 @@ def run():
         except NoSuchElementException:
             pass
 
+        if name == "":
+            raise Exception("Could not parse location name")
+
         address1 = site.find_element_by_class_name("sfgov-address__line1")
         address2 = site.find_element_by_class_name("sfgov-address__city-state-zip")
         address = ', '.join([address1.text, address2.text])
 
+        if address == "":
+            raise Exception("Could not parse location address")
+
         location = Location(
-            name = title.text,
+            name = name,
             address = address,
             county = county.name
         )
@@ -48,3 +54,8 @@ def run():
     driver.close()
     display.stop()
     return locations
+
+
+if __name__ == "__main__":
+    locations = run()
+    print(locations)

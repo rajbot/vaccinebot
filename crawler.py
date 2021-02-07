@@ -22,9 +22,13 @@ logging.info(f'loaded {len(db["content"])} locations')
 for modinfo in pkgutil.iter_modules(location_parsers.__path__):
     m = importlib.import_module(f'.{modinfo.name}', 'location_parsers')
     logging.info(f'Parsing {m.county.name} County')
-    locations = m.run()
-    logging.info(f'\tFound {len(locations)} locations')
+    try:
+        locations = m.run()
+    except Exception as e:
+        logging.error(f'\tParser for {m.county.name} County failed! Please fix this parser. Err: {e}')
+        continue
 
+    logging.info(f'\tParsed {len(locations)} locations')
     # check to see if these locations are already in the database
     num_found = 0
     for location in locations:
