@@ -2,7 +2,6 @@
 
 # Run manually: python3 -m location_parsers.imperial
 
-import http
 import re
 import urllib3
 from bs4 import BeautifulSoup

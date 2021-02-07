@@ -3,7 +3,6 @@
 
 # Run manually: python3 -m location_parsers.eldorado
 
-import http
 import re
 import urllib3
 from bs4 import BeautifulSoup
