@@ -10,4 +10,4 @@ header_dict = {'user-agent': agent_string}             # for urllib3
 chromedriver_path =  os.environ.get("CHROMEDRIVER_PATH")
 
 County = namedtuple('County', ['name', 'url'])
-Location = namedtuple('Location', ['name', 'address', 'county'])
+Location = namedtuple('Location', ['name', 'address', 'county', 'url'])

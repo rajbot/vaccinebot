@@ -19,7 +19,7 @@ sudo apt-get install xvfb
 pip3 install wheel
 pip3 install pyvirtualdisplay
 
-pip3 install beautifulsoup4
+pip3 install beautifulsoup4 lxml
 ```
 
 

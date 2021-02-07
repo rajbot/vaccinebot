@@ -66,7 +66,8 @@ def run():
             location = Location(
                 name = title,
                 address = address,
-                county = county.name
+                county = county.name,
+                url = None
             )
             locations.append(location)
 
