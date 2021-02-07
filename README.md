@@ -1,4 +1,4 @@
-# Install on Ubuntu 18.04
+# Install on Ubuntu 18.04 headless
 ```bash
 sudo apt-get update
 sudo apt-get install -y libappindicator1 fonts-liberation
@@ -40,12 +40,13 @@ pip3 install -r requirements_osx.txt
 ```
 
 
-# Run vaccination site crawler on Ubuntu 18.04
+# Run vaccination site crawler on Ubuntu 18.04 headless
 ```bash
 killall chrome #kill any old chrome processes that may have hung
 
 source venv/bin/activate
 export CHROMEDRIVER_PATH=/path/to/chromedriver
+export HEADLESS=true
 
 nice ./crawler.py
 ```
