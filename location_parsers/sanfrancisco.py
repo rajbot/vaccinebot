@@ -58,15 +58,11 @@ def run():
 
 # Not used for now
 def run_selenium():
-    from . import chrome_opts, chromedriver_path
     from pyvirtualdisplay import Display
     from selenium import webdriver
     from selenium.common.exceptions import NoSuchElementException
 
-    display = Display(visible=0, size=(800, 600))
-    display.start()
-
-    driver = webdriver.Chrome(chromedriver_path, chrome_options=chrome_opts)
+    driver, display = driver_start()
     driver.get(county.url)
 
     locations = []
@@ -100,8 +96,7 @@ def run_selenium():
         )
         locations.append(location)
 
-    driver.close()
-    display.stop()
+    driver_stop(driver, display)
     return locations
 
 
