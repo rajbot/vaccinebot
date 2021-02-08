@@ -50,12 +50,14 @@ def run():
     time.sleep(1)
 
     # Click the export to CSV button
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//strong[contains(., 'Export to CSV')]")))
     e = driver.find_element_by_xpath("//strong[contains(., 'Export to CSV')]")
     button = e.find_element_by_xpath('..')
     driver.execute_script("arguments[0].click();", button)
     time.sleep(1)
 
     # Click the OK button to download CSV to `dir/Export.csv`
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "//p[contains(., 'Confirm?')]")))
     p = driver.find_element_by_xpath("//p[contains(., 'Confirm?')]")
     driver.execute_script("console.log(arguments[0]);", p)
 
