@@ -24,7 +24,6 @@ county = County(
 # Returns a list of Location objects
 def run():
     dir = tempfile.TemporaryDirectory()
-    print("Using tempdir", dir.name)
     driver, display = driver_start(download_dir=dir.name)
     driver.get(county.url)
 
