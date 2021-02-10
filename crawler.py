@@ -4,6 +4,7 @@ import importlib
 import json
 import logging
 import pkgutil
+import sys
 import urllib.request
 
 import location_parsers
@@ -17,10 +18,16 @@ with urllib.request.urlopen("https://api.vaccinateca.com/v1/locations.json") as 
 
 logging.info(f'loaded {len(db["content"])} locations')
 
+if len(sys.argv) == 2:
+    county = sys.argv[1]
+    logging.info(f'Running crawl only for {county.title()} County')
 
 # dynamically load each county module and parse location data
 for modinfo in pkgutil.iter_modules(location_parsers.__path__):
     m = importlib.import_module(f'.{modinfo.name}', 'location_parsers')
+    if m.county.name.lower() != county.lower():
+        continue
+
     logging.info(f'Parsing {m.county.name} County')
     try:
         locations = m.run()

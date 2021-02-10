@@ -1,4 +1,5 @@
 import os
+import re
 from collections import namedtuple
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -12,7 +13,7 @@ agent_string = "Vaccinebot (+https://bitstream.io/vaccinebot)"
 header_dict = {'user-agent': agent_string} # for urllib3
 
 County = namedtuple('County', ['name', 'url'])
-Location = namedtuple('Location', ['name', 'address', 'county', 'url'])
+Location = namedtuple('Location', ['name', 'address', 'county', 'url'], defaults=[None] * 4)
 
 
 def driver_start(download_dir=None):
@@ -37,8 +38,19 @@ def driver_start(download_dir=None):
     driver = webdriver.Chrome(chromedriver_path, options=chrome_opts)
     return driver, display
 
+
 def driver_stop(driver, display):
     driver.close()
 
     if headless_mode:
         display.stop()
+
+
+def validate(locations):
+    for l in locations:
+        if l.name is None or l.name.strip() == '':
+            raise("Could not parse name")
+        if l.address is None or l.address.strip() == '':
+            raise("Could not parse name")
+        if not re.search(r', CA 9\d{4}$', l.address):
+            raise Exception("Couldn't parse zip code")
