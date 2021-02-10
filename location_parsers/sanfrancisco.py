@@ -13,17 +13,16 @@ from . import County, Location
 
 
 county = County(
-    name = "San Francisco",
-    url = "https://sf.gov/get-vaccinated-against-covid-19"
+    name="San Francisco", url="https://sf.gov/get-vaccinated-against-covid-19"
 )
 
 
 # Returns a list of Location objects
 def run():
     http = urllib3.PoolManager(headers=header_dict)
-    r = http.request('GET', county.url)
+    r = http.request("GET", county.url)
 
-    soup = BeautifulSoup(r.data, 'lxml')
+    soup = BeautifulSoup(r.data, "lxml")
     locations = []
 
     sites = soup.find_all("div", class_="sfgov-address")
@@ -34,24 +33,21 @@ def run():
 
         title2 = site.find(class_="sfgov-address__location-name")
         if title2 is not None:
-            name += f' - {title2.string}'
+            name += f" - {title2.string}"
 
         if name == "":
             raise Exception("Could not parse location name")
 
         address1 = site.find(class_="sfgov-address__line1")
         address2 = site.find(class_="sfgov-address__city-state-zip")
-        address = ', '.join([address1.string, address2.string])
+        address = ", ".join([address1.string, address2.string])
 
         if address == "":
             raise Exception("Could not parse location address")
 
-        locations.append(Location(
-            name = name,
-            address = address,
-            county = county.name,
-            url = None
-        ))
+        locations.append(
+            Location(name=name, address=address, county=county.name, url=None)
+        )
 
     return locations
 
@@ -74,7 +70,7 @@ def run_selenium():
 
         try:
             name2 = site.find_element_by_class_name("sfgov-address__location-name")
-            name += f'- {name2.text}'
+            name += f"- {name2.text}"
         except NoSuchElementException:
             pass
 
@@ -83,17 +79,12 @@ def run_selenium():
 
         address1 = site.find_element_by_class_name("sfgov-address__line1")
         address2 = site.find_element_by_class_name("sfgov-address__city-state-zip")
-        address = ', '.join([address1.text, address2.text])
+        address = ", ".join([address1.text, address2.text])
 
         if address == "":
             raise Exception("Could not parse location address")
 
-        location = Location(
-            name = name,
-            address = address,
-            county = county.name,
-            url = None
-        )
+        location = Location(name=name, address=address, county=county.name, url=None)
         locations.append(location)
 
     driver_stop(driver, display)

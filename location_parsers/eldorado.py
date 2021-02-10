@@ -11,27 +11,26 @@ from . import header_dict
 from . import County, Location
 
 county = County(
-    name = "El Dorado",
-    url = "https://www.edcgov.us/Government/hhsa/edccovid-19-clinics"
+    name="El Dorado", url="https://www.edcgov.us/Government/hhsa/edccovid-19-clinics"
 )
 
 # Returns a list of Location objects
 def run():
     http = urllib3.PoolManager(headers=header_dict)
-    r = http.request('GET', county.url)
+    r = http.request("GET", county.url)
 
-    soup = BeautifulSoup(r.data, 'html.parser')
+    soup = BeautifulSoup(r.data, "html.parser")
 
-    span = soup.find('span', string="EL DORADO COUNTY PUBLIC HEALTH CLINICS")
+    span = soup.find("span", string="EL DORADO COUNTY PUBLIC HEALTH CLINICS")
 
     header_div = span.parent.parent
     locations_div = header_div.next_sibling
-    locations_list = locations_div.find('ul')
-    locations_items = locations_list.find_all('li')
+    locations_list = locations_div.find("ul")
+    locations_items = locations_list.find_all("li")
 
     locations = []
     for item in locations_list.contents:
-        if item.name == 'li':
+        if item.name == "li":
             # Parse title, split across multiple spans
             title = ""
             title_spans = item.find_all(style=re.compile("font-weight:bold"))
@@ -41,16 +40,16 @@ def run():
             if title == "":
                 raise Exception("Could not parse location name")
 
-            title = title.rstrip(':')
+            title = title.rstrip(":")
             # one title is missing whitespace around hyphen
-            title = re.sub(r'(\S)-(\S)', r'\1 - \2', title)
-            title = title.replace(u'\xa0', u' ')
+            title = re.sub(r"(\S)-(\S)", r"\1 - \2", title)
+            title = title.replace(u"\xa0", u" ")
             title = "El Dorado " + title
 
             # Parse address
             address = ""
             last_span = title_spans[-1].next_sibling
-            while(last_span is not None):
+            while last_span is not None:
                 s = last_span.string
                 if s is not None:
                     address += s
@@ -60,13 +59,10 @@ def run():
             if address == "":
                 raise Exception("Could not parse location address")
 
-            address +=", CA"
+            address += ", CA"
 
             location = Location(
-                name = title,
-                address = address,
-                county = county.name,
-                url = None
+                name=title, address=address, county=county.name, url=None
             )
             locations.append(location)
 

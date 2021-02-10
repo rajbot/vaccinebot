@@ -10,19 +10,19 @@ from . import header_dict
 from . import County, Location
 
 county = County(
-    name = "Imperial",
-    url = "http://www.icphd.org/health-information-and-resources/healthy-facts/covid-19/covid-19-vaccine/vaccination-clinics/65-years-of-age-and-older/"
+    name="Imperial",
+    url="http://www.icphd.org/health-information-and-resources/healthy-facts/covid-19/covid-19-vaccine/vaccination-clinics/65-years-of-age-and-older/",
 )
 
 # Returns a list of Location objects
 def run():
     http = urllib3.PoolManager(headers=header_dict)
-    r = http.request('GET', county.url)
+    r = http.request("GET", county.url)
 
-    soup = BeautifulSoup(r.data, 'lxml')
+    soup = BeautifulSoup(r.data, "lxml")
 
     locations = []
-    headers = soup.find_all('b', string=re.compile("Vaccine Provider:"))
+    headers = soup.find_all("b", string=re.compile("Vaccine Provider:"))
 
     if len(headers) == 0:
         raise Exception("Could not parse headers")
@@ -39,7 +39,7 @@ def run():
             raise Exception("Could not parse location name (got empty string)")
 
         # Parse location address
-        address_header = h.parent.find('b', string=re.compile("Address:"))
+        address_header = h.parent.find("b", string=re.compile("Address:"))
 
         # There could be a misplaced </b> tag, grab trailing text for the start of the address
         address = address_header.string.lstrip("Address:")
@@ -51,23 +51,20 @@ def run():
 
         address = address + a.string
         address = address.strip()
-        address = re.sub(r'St\.,', 'Street,', address)            # Canonicalize
-        address = re.sub(r'St\. ([A-Z])', r'Street, \1', address) # missing comma
-        address = re.sub(r'\s+', ' ', address)                    # repeated whitespace
+        address = re.sub(r"St\.,", "Street,", address)  # Canonicalize
+        address = re.sub(r"St\. ([A-Z])", r"Street, \1", address)  # missing comma
+        address = re.sub(r"\s+", " ", address)  # repeated whitespace
 
         if address == "":
             raise Exception("Could not parse location address (got empty string)")
 
         # Parse url
-        a = h.parent.find('a')
-        url = a.get('href')
+        a = h.parent.find("a")
+        url = a.get("href")
 
-        locations.append(Location(
-            name = name,
-            address = address,
-            county = county.name,
-            url = url
-        ))
+        locations.append(
+            Location(name=name, address=address, county=county.name, url=url)
+        )
 
     return locations
 
