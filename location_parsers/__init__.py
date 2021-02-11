@@ -54,13 +54,23 @@ def driver_stop(driver, display):
         display.stop()
 
 
+def add_state(address):
+    """fix any addresses with missing state"""
+    return re.sub(r", (9\d{4})$", r", CA \1", address.strip())
+
+
 def validate(locations):
     for l in locations:
         if l.name is None or l.name.strip() == "":
             raise Exception("Could not parse name")
         if l.address is None or l.address.strip() == "":
-            raise Exception("Could not parse address")
+            raise Exception(f"Could not parse address: {l.address}")
         if not re.search(r", CA 9\d{4}$", l.address):
-            raise Exception("Couldn't parse zip code")
+            raise Exception(f"Couldn't parse zip code: {l.address}")
         if l.county is None or l.county.strip() == "":
             raise Exception("Could not parse county")
+
+
+def debug_print(locations):
+    for l in locations:
+        print(f"{l.name}\t{l.address}\t{l.url}")
