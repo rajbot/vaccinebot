@@ -16,8 +16,8 @@ header_dict = {"user-agent": agent_string}  # for urllib3
 County = namedtuple("County", ["name", "url"])
 Location = namedtuple(
     "Location",
-    ["name", "address", "county", "url", "reservation_url"],
-    defaults=[None] * 5,
+    ["name", "address", "county", "url", "reservation_url", "phone", "hours"],
+    defaults=[None] * 7,
 )
 
 
@@ -73,4 +73,6 @@ def validate(locations):
 
 def debug_print(locations):
     for l in locations:
-        print(f"{l.name}\t{l.address}\t{l.url}")
+        for key in l._fields:
+            print(f"{key:20} {getattr(l, key)}")
+        print()

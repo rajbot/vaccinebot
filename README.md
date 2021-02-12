@@ -1,3 +1,19 @@
+# Usage
+
+```
+usage: crawler.py [-h] [-v] [-c COUNTY] [--add-records]
+
+VaccinateCA crawler.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose
+  -c COUNTY, --county COUNTY
+                        Run crawler only for the specified county
+  --add-records         Add new locations found to Airtable
+```
+
+
 # Install and run on OS X
 
 Make sure you have the Chrome browser installed first.

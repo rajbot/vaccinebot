@@ -10,6 +10,7 @@ import time
 
 from . import County, Location
 from . import driver_start, driver_stop
+from . import debug_print, validate
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -91,18 +92,21 @@ def run():
         for row in reader:
             url = None
             if row["Online Registration"] != "":
-                url = row["Online Registration"]
+                url = row["Online Registration"].strip()
             locations.append(
                 Location(
                     name=row["Facility Name"].strip(),
                     address=f'{row["Address"].strip()}, {row["City"].strip()}, CA {row["Zip Code"].strip()}',
                     url=url,
+                    phone=row["Phone Number"].strip(),
+                    hours=row["Hours"].strip(),
                     county=county.name,
                 )
             )
+    validate(locations)
     return locations
 
 
 if __name__ == "__main__":
     locations = run()
-    print(locations)
+    debug_print(locations)
