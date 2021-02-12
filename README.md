@@ -14,6 +14,14 @@ optional arguments:
 ```
 
 
+# Environment variables
+
+- You will need to set `CHROMEDRIVER_PATH` for webdriver. See install and run instructions below.
+- If you are using the `--add-records` flag, you will need to set the following:
+    - `AIRTABLE_API_KEY` and `AIRTABLE_BASE_ID` for writing to AirTable
+    - `MAPQUEST_API_KEY` for looking up lat/long
+
+
 # Install and run on OS X
 
 Make sure you have the Chrome browser installed first.

@@ -39,10 +39,7 @@ if args.county is not None:
     logging.info(f"Running crawl only for {county.title()} County")
 
 if args.add_records:
-    if os.environ.get("AIRTABLE_API_KEY") is None:
-        sys.exit("Must set AIRTABLE_API_KEY env var!")
-    if os.environ.get("AIRTABLE_BASE_ID") is None:
-        sys.exit("Must set AIRTABLE_BASE_ID env var!")
+    locations.validate_env_vars()
 
 
 logging.info("Downloading known locations")
@@ -70,15 +67,12 @@ for modinfo in pkgutil.iter_modules(location_parsers.__path__):
         continue
 
     logging.info(f"\tParsed {len(locs)} locations")
+
     # check to see if these locations are already in the database
     num_found = 0
     for location in locs:
-        found = False
-        for db_loc in db["content"]:
-            # match on address field, which should be sufficient
-            if db_loc.get("Address", "").lower().startswith(location.address.lower()):
-                found = True
-                break
+        found = locations.in_db(location, db)
+
         if not found:
             if not args.add_records:
                 logging.warning(
@@ -86,9 +80,12 @@ for modinfo in pkgutil.iter_modules(location_parsers.__path__):
                 )
             else:
                 locations.print_fuzzy_matches(location, db["content"])
+                latlong = locations.get_lat_long(location.address)
+                print(f"Found lat/long: {latlong}")
+
                 response = input("Add this record to Airtable? (y/n):")
                 if response == "y":
-                    locations.airtable_insert(location)
+                    locations.airtable_insert(location, latlong)
         else:
             num_found += 1
 
