@@ -12,7 +12,7 @@ base_id = os.environ.get("AIRTABLE_BASE_ID")
 
 
 # validate_env_vars()
-#_________________________________________________________________________________________
+# _________________________________________________________________________________________
 def validate_env_vars():
     for var in ["AIRTABLE_API_KEY", "AIRTABLE_BASE_ID", "MAPQUEST_API_KEY"]:
         if os.environ.get(var) is None:
@@ -20,14 +20,14 @@ def validate_env_vars():
 
 
 # get_lat_long()
-#_________________________________________________________________________________________
+# _________________________________________________________________________________________
 def get_lat_long(a):
     g = geocoder.mapquest(a)
-    return g.json['lat'], g.json['lng']
+    return g.json["lat"], g.json["lng"]
 
 
 # canonicalize()
-#_________________________________________________________________________________________
+# _________________________________________________________________________________________
 def canonicalize(a):
     """
     >>> canonicalize("460 W San Ysidro Blvd, San Ysidro, CA 92173, United States")
@@ -35,11 +35,14 @@ def canonicalize(a):
 
     >>> canonicalize("555 E. Valley Pkwy, Escondido, CA 92025")
     '555 east valley parkway, escondido, ca 92025'
+
+    >>> canonicalize("500 OLD RIVER RD STE 125, BAKERSFIELD, CA 93311")
+    500 old river rd suite 125, bakersfield, ca 93311
     """
 
     a = a.lower()
     if a.endswith(", united states"):
-        a = a[:-len(", united states")]
+        a = a[: -len(", united states")]
 
     a = re.sub(r" e\.? ", " east ", a)
     a = re.sub(r" w\.? ", " west ", a)
@@ -47,12 +50,13 @@ def canonicalize(a):
     a = re.sub(r" s\.? ", " south ", a)
 
     a = re.sub(r" pkwy(\W)", r" parkway\1", a)
+    a = re.sub(r" ste(\W)", r" suite\1", a)
 
     return a
 
 
 # in_db()
-#_________________________________________________________________________________________
+# _________________________________________________________________________________________
 def in_db(location, db):
     """Return True if location is already in airtable"""
 
@@ -67,7 +71,7 @@ def in_db(location, db):
 
 
 # print_fuzzy_matches()
-#_________________________________________________________________________________________
+# _________________________________________________________________________________________
 def print_fuzzy_matches(location, table):
     print("New location found:")
     print(f"\t{location.name}")
@@ -102,7 +106,7 @@ def print_fuzzy_matches(location, table):
 
 
 # airtable_insert()
-#_________________________________________________________________________________________
+# _________________________________________________________________________________________
 def airtable_insert(location, latlong):
     airtable = Airtable(base_id, "Locations", api_key)
     url = location.url
