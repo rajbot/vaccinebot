@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 
 from . import header_dict
 from . import County, Location
+from . import debug_print, validate
 
 county = County(
     name="Imperial",
@@ -39,7 +40,7 @@ def run():
             raise Exception("Could not parse location name (got empty string)")
 
         # Parse location address
-        address_header = h.parent.find("b", string=re.compile("Address:"))
+        address_header = h.parent.find("b", string=re.compile("(Address|Location):"))
 
         # There could be a misplaced </b> tag, grab trailing text for the start of the address
         address = address_header.string.lstrip("Address:")
@@ -53,22 +54,29 @@ def run():
         address = address.strip()
         address = re.sub(r"St\.,", "Street,", address)  # Canonicalize
         address = re.sub(r"St\. ([A-Z])", r"Street, \1", address)  # missing comma
+        address = re.sub(r"(\w) CA ", r"\1, CA ", address)  # missing comma
         address = re.sub(r"\s+", " ", address)  # repeated whitespace
+        if address.startswith("Location: "):
+            address = address[len("Location: "):]
+
 
         if address == "":
             raise Exception("Could not parse location address (got empty string)")
 
         # Parse url
         a = h.parent.find("a")
-        url = a.get("href")
+        url = None
+        if a is not None:
+            url = a.get("href")
 
         locations.append(
             Location(name=name, address=address, county=county.name, url=url)
         )
 
+    validate(locations)
     return locations
 
 
 if __name__ == "__main__":
     locations = run()
-    print(locations)
+    debug_print(locations)
