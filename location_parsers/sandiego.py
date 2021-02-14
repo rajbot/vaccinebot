@@ -19,6 +19,18 @@ county = County(
 )
 
 
+def address_fixup(a):
+    """ Some San Diego addresses aren't fixed up by the canonicalizer. """
+
+    # A newline in the middle of a city name, that should be turned into a space.
+    # canonicalize() will turn it into a comma instead
+    a = a.replace(
+        "2260 Jimmy Durante Blvd, Del\nMar, CA 92014",
+        "2260 Jimmy Durante Blvd, Del Mar, CA 92014",
+    )
+    return a
+
+
 # Returns a list of json objects
 def run():
     http = urllib3.PoolManager(headers=header_dict)  # set user-agent
@@ -43,9 +55,10 @@ def run():
 
         for feature in obj["features"]:
             attributes = feature["attributes"]
+            address = address_fixup(attributes["fulladdr"])
             l = Location(
                 name=attributes["name"].strip(),
-                address=add_state(attributes["fulladdr"]),
+                address=add_state(address),
                 url=attributes.get("url_scheduling").strip(),
                 phone=attributes.get("phone"),
                 hours=attributes.get("operhours"),
