@@ -204,40 +204,17 @@ def address_line1(a):
     return a
 
 
-
-# address_match()
-# ________________________________________________________________________________________
-def address_match(db_address, a2):
-    """Match canonicalized addresses, using just the first line of a multipart address
-
-    e.g when matching '123 main street suite 456, city, state, zip', strip 'suite 456'
-    and then perform the match.
-
-    >>> addr = '9201 W. Sunset Blvd., Suite 812\\nWest Hollywood, Ca. 90069'
-    >>> db_addr = address_line1(canonicalize('9201 Sunset Blvd., West Hollywood, Ca. 90069'))
-    >>> address_match(db_addr, addr)
-    True
-
-    """
-    a1 = db_address # already canonicalized
-    a2 = address_line1(canonicalize(a2))
-
-    if a1 == a2:
-        return True
-    return False
-
-
 # in_db()
 # ________________________________________________________________________________________
 def in_db(location, db):
     """Return True if location is already in airtable"""
 
+    loc_address = address_line1(canonicalize(location.address))
+
     for db_loc in db["content"]:
-        # fuzzy match on address field
-        #db_address = db_loc.get("Address", "")
+        # match on canonicalized address field
         db_address = db_loc["address_line1"]
-        loc_address = location.address
-        if address_match(db_address, loc_address):
+        if db_address == loc_address:
             return True
 
     return False
