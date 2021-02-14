@@ -3,6 +3,7 @@ import editdistance
 import geocoder
 import os
 import re
+import sys
 
 max_distance = 10
 max_address_difference = 50
@@ -26,52 +27,233 @@ def get_lat_long(a):
     return g.json["lat"], g.json["lng"]
 
 
+# normalize()
+# _________________________________________________________________________________________
+def normalize(a):
+    # requres libpostal c library to be installed
+    from postal.parser import parse_address
+    d = {k: v for (v, k) in parse_address(a)}
+    return f"{d.get('house_number')} {d.get('road')}, {d.get('city')}, {d.get('state')} {d.get('postcode')}"
+
+
 # canonicalize()
 # _________________________________________________________________________________________
 def canonicalize(a):
     """
     >>> canonicalize("460 W San Ysidro Blvd, San Ysidro, CA 92173, United States")
-    '460 west san ysidro blvd, san ysidro, ca 92173'
+    '460 west san ysidro boulevard, san ysidro, ca 92173'
+
+    >>> canonicalize("1208 WEST REDONDO BEACH BOULEVARD, GARDENA, CA 90247")
+    '1208 west redondo beach boulevard, gardena, ca 90247'
+
+    >>> canonicalize("1208 West Redondo Beach Blvd., Gardena, CA 90247")
+    '1208 west redondo beach boulevard, gardena, ca 90247'
 
     >>> canonicalize("555 E. Valley Pkwy, Escondido, CA 92025")
     '555 east valley parkway, escondido, ca 92025'
 
     >>> canonicalize("500 OLD RIVER RD STE 125, BAKERSFIELD, CA 93311")
-    500 old river rd suite 125, bakersfield, ca 93311
+    '500 old river road suite 125, bakersfield, ca 93311'
+
+    >>> canonicalize("2419 EAST AVENUE  SOUTH, PALMDALE, CA 93550")
+    '2419 east avenue south, palmdale, ca 93550'
+
+    >>> canonicalize("2419 East Avenue S, Palmdale, CA 93550")
+    '2419 east avenue south, palmdale, ca 93550'
+
+    >>> canonicalize("7239 WOODMAN AVENUE, VAN NUYS, CA 91405")
+    '7239 woodman avenue, van nuys, ca 91405'
+
+    >>> canonicalize("7239 Woodman Ave, Van Nuys, CA 91405")
+    '7239 woodman avenue, van nuys, ca 91405'
+
+    >>> canonicalize("10823 ZELZAH AVENUE BUILDING D, GRANADA HILLS, CA 91344")
+    '10823 zelzah avenue building d, granada hills, ca 91344'
+
+    >>> canonicalize("10823 Zelzah Avenue Bldg D, Granada Hills, CA 91344")
+    '10823 zelzah avenue building d, granada hills, ca 91344'
+
+    >>> canonicalize("23 PENINSULA CENTER, ROLLING HILLS ESTATES, CA 90274")
+    '23 peninsula center, rolling hills estates, ca 90274'
+
+    >>> canonicalize("23 Peninsula Center, Rolling Hills Ests, CA 90274")
+    '23 peninsula center, rolling hills estates, ca 90274'
+
+    >>> canonicalize("2352 Arrow Hwy (Gate 15) , Pomona, CA 91768")
+    '2352 arrow hwy (gate 15), pomona, ca 91768'
+
+    >>> canonicalize("11798 Foothill Blvd., , Lake View Terrace, CA 91342")
+    '11798 foothill boulevard, lake view terrace, ca 91342'
+
+    >>> canonicalize('808 W. 58th St. \\nLos Angeles, CA 90037')
+    '808 west 58th street, los angeles, ca 90037'
+
+    >>> canonicalize("45104 10th St W\\nLancaster, CA 93534")
+    '45104 10th street west, lancaster, ca 93534'
+
+    >>> canonicalize("133 W Rte 66, Glendora, CA 91740")
+    '133 west route 66, glendora, ca 91740'
+
+    >>> canonicalize("3410 W THIRD ST, LOS ANGELES, CA 90020")
+    '3410 west 3rd street, los angeles, ca 90020'
     """
 
-    a = a.lower()
+    #if a.startswith('45104 '):
+    #    import pdb
+    #    pdb.set_trace()
+
+    a = a.lower().strip()
     if a.endswith(", united states"):
         a = a[: -len(", united states")]
 
-    a = re.sub(r" e\.? ", " east ", a)
-    a = re.sub(r" w\.? ", " west ", a)
-    a = re.sub(r" n\.? ", " north ", a)
-    a = re.sub(r" s\.? ", " south ", a)
+    a = re.sub(r"([^,])\n+", r"\1, ", a)    # newline instead of comma
+    a = re.sub(r",\s+,", ", ", a)            # repeated comma
+    a = re.sub(r"\s+, ", ", ", a)           # extra space around comma
 
-    a = re.sub(r" pkwy(\W)", r" parkway\1", a)
-    a = re.sub(r" ste(\W)", r" suite\1", a)
+    a = re.sub(r" e\.?(\W)? ", r" east\1 ", a, re.I)
+    a = re.sub(r" w\.?(\W)? ", r" west\1 ", a)
+    a = re.sub(r" n\.?(\W)? ", r" north\1 ", a)
+    a = re.sub(r" s\.?(\W)? ", r" south\1 ", a)
+
+    a = re.sub(r" ave\.?(\W)", r" avenue\1", a)
+    a = re.sub(r" blvd\.?(\W)", r" boulevard\1", a)
+    a = re.sub(r" ctr\.?(\W)", r" center\1", a)
+    a = re.sub(r" ests\.?(\W)", r" estates\1", a)
+    a = re.sub(r" rd\.?(\W)", r" road\1", a)
+    a = re.sub(r" pkwy\.?(\W)", r" parkway\1", a)
+    a = re.sub(r" rte\.?(\W)", r" route\1", a)
+    a = re.sub(r" ste\.?(\W)", r" suite\1", a)
+    a = re.sub(r" st\.?(\W)", r" street\1", a)
+    a = re.sub(r" wy\.?(\W)", r" way\1", a)
+
+    a = re.sub(r" bldg\.?(\W)", r" building\1", a)
+
+    # Use numeric version of street names.
+    # i.e. "1st" instead of "first"
+    a = re.sub(r'(\W)first(\W)', r'\g<1>1st\g<2>', a)
+    a = re.sub(r'(\W)second(\W)', r'\g<1>2nd\g<2>', a)
+    a = re.sub(r'(\W)third(\W)', r'\g<1>3rd\g<2>', a)
+    a = re.sub(r'(\W)fourth(\W)', r'\g<1>4th\g<2>', a)
+    a = re.sub(r'(\W)fifth(\W)', r'\g<1>5th\g<2>', a)
+    a = re.sub(r'(\W)sixth(\W)', r'\g<1>6th\g<2>', a)
+    a = re.sub(r'(\W)seventh(\W)', r'\g<1>7th\g<2>', a)
+    a = re.sub(r'(\W)eighth(\W)', r'\g<1>8th\g<2>', a)
+    a = re.sub(r'(\W)ninth(\W)', r'\g<1>9th\g<2>', a)
+    a = re.sub(r'(\W)tenth(\W)', r'\g<1>10th\g<2>', a)
+
+    a = re.sub(r"\s+", " ", a)
+    return a
+
+
+# address_line1()
+# ________________________________________________________________________________________
+def address_line1(a):
+    """Return only the main part of a multipart address
+
+    Warnings:
+    - Only works on canonicalized addresses. Call canonicalize() first.
+    - Returns addresses that are incorrect!
+    - Only use the output of this function for fuzzy matching.
+
+    >>> address_line1('1910 south magnolia avenue suite 101, los angeles, ca 90007')
+    '1910 magnolia, los angeles, ca 90007'
+
+    >>> a = '9201 W. Sunset Blvd., Suite 812\\nWest Hollywood, Ca. 90069'
+    >>> address_line1(canonicalize(a))
+    '9201 sunset, west hollywood, ca. 90069'
+
+    >>> a = '45104 10th St W Ste A, Lancaster, CA 93534'
+    >>> address_line1(canonicalize(a))
+    '45104 10th, lancaster, ca 93534'
+    """
+
+    a = re.sub(r',? suite [0-9a-z]+,', ',', a)
+
+    s = a.split(', ', 1)
+    if len(s) == 2:
+        address = s[0]
+        address = re.sub(r' east$', r'', address)
+        address = re.sub(r'^east ', r'', address)
+        address = re.sub(r' east ', r' ', address)
+
+        address = re.sub(r' west$', r'', address)
+        address = re.sub(r'^west ', r'', address)
+        address = re.sub(r' west ', r' ', address)
+
+        address = re.sub(r' north$', r'', address)
+        address = re.sub(r'^north ', r'', address)
+        address = re.sub(r' north ', r' ', address)
+
+        address = re.sub(r' south$', r'', address)
+        address = re.sub(r'^south ', r'', address)
+        address = re.sub(r' south ', r' ', address)
+
+        a = f"{address}, {s[1]}"
+
+    a = a.replace(' avenue,', ',')
+    a = a.replace(' boulevard,', ',')
+    a = a.replace(' center,', ',')
+    a = a.replace(' estates,', ',')
+    a = a.replace(' parkway,', ',')
+    a = a.replace(' road,', ',')
+    a = a.replace(' route,', ',')
+    a = a.replace(' suite,', ',')
+    a = a.replace(' street,', ',')
+    a = a.replace(' way,', ',')
 
     return a
 
 
+
+# address_match()
+# ________________________________________________________________________________________
+def address_match(db_address, a2):
+    """Match canonicalized addresses, using just the first line of a multipart address
+
+    e.g when matching '123 main street suite 456, city, state, zip', strip 'suite 456'
+    and then perform the match.
+
+    >>> addr = '9201 W. Sunset Blvd., Suite 812\\nWest Hollywood, Ca. 90069'
+    >>> db_addr = address_line1(canonicalize('9201 Sunset Blvd., West Hollywood, Ca. 90069'))
+    >>> address_match(db_addr, addr)
+    True
+
+    """
+    a1 = db_address # already canonicalized
+    a2 = address_line1(canonicalize(a2))
+
+    if a1 == a2:
+        return True
+    return False
+
+
 # in_db()
-# _________________________________________________________________________________________
+# ________________________________________________________________________________________
 def in_db(location, db):
     """Return True if location is already in airtable"""
 
     for db_loc in db["content"]:
-        # match on address field,
-        db_address = canonicalize(db_loc.get("Address", ""))
-        loc_address = canonicalize(location.address)
-        if db_address == loc_address:
+        # fuzzy match on address field
+        #db_address = db_loc.get("Address", "")
+        db_address = db_loc["address_line1"]
+        loc_address = location.address
+        if address_match(db_address, loc_address):
             return True
 
     return False
 
 
+# cannonicalize_db()
+# ________________________________________________________________________________________
+def cannonicalize_db(db):
+    for db_loc in db["content"]:
+        db_address = db_loc.get("Address", "")
+        a = address_line1(canonicalize(db_address))
+        db_loc["address_line1"] = a
+
+
 # print_fuzzy_matches()
-# _________________________________________________________________________________________
+# ________________________________________________________________________________________
 def print_fuzzy_matches(location, table):
     print("New location found:")
     print(f"\t{location.name}")
@@ -107,7 +289,13 @@ def print_fuzzy_matches(location, table):
 
 # airtable_insert()
 # _________________________________________________________________________________________
-def airtable_insert(location, latlong):
+def airtable_insert(location):
+    lat = location.lat
+    long = location.long
+    if lat is None or long is None:
+        lat, long = get_lat_long(location.address)
+        print(f"Found lat/long: {lat}, {long}")
+
     airtable = Airtable(base_id, "Locations", api_key)
     url = location.url
     if location.reservation_url is not None:
@@ -121,7 +309,7 @@ def airtable_insert(location, latlong):
             "Phone number": location.phone,
             "Hours": location.hours,
             "County": f"{location.county} County",
-            "Latitude": latlong[0],
-            "Longitude": latlong[1],
+            "Latitude": lat,
+            "Longitude": long,
         }
     )

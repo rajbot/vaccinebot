@@ -16,8 +16,8 @@ header_dict = {"user-agent": agent_string}  # for urllib3
 County = namedtuple("County", ["name", "url"])
 Location = namedtuple(
     "Location",
-    ["name", "address", "county", "url", "reservation_url", "phone", "hours"],
-    defaults=[None] * 7,
+    ["name", "address", "county", "url", "reservation_url", "phone", "hours", "lat", "long"],
+    defaults=[None] * 9,
 )
 
 

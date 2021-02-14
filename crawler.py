@@ -50,6 +50,9 @@ with urllib.request.urlopen(
 
 logging.info(f'loaded {len(db["content"])} locations')
 
+# add canonicalized address to db dict
+locations.cannonicalize_db(db)
+
 
 # dynamically load each county module and parse location data
 for modinfo in pkgutil.iter_modules(location_parsers.__path__):
@@ -80,12 +83,9 @@ for modinfo in pkgutil.iter_modules(location_parsers.__path__):
                 )
             else:
                 locations.print_fuzzy_matches(location, db["content"])
-                latlong = locations.get_lat_long(location.address)
-                print(f"Found lat/long: {latlong}")
-
                 response = input("Add this record to Airtable? (y/n):")
                 if response == "y":
-                    locations.airtable_insert(location, latlong)
+                    locations.airtable_insert(location)
         else:
             num_found += 1
 
