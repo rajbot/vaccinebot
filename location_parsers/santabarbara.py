@@ -1,5 +1,4 @@
-# Parse vaccination site locations for San Francisco County
-# TODO: parse nonstandard City Collage location
+# Parse vaccination site locations for Santa Barbara County
 
 # Run manually: python3 -m location_parsers.santabarbara
 
@@ -59,9 +58,10 @@ def run():
         if ", CA" not in address:
             continue
 
-        l = Location(name=name, address=address)
+        l = Location(name=name, address=address, county=county.name)
         locations.append(l)
 
+    validate(locations)
     return locations
 
 
