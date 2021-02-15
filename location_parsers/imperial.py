@@ -57,8 +57,7 @@ def run():
         address = re.sub(r"(\w) CA ", r"\1, CA ", address)  # missing comma
         address = re.sub(r"\s+", " ", address)  # repeated whitespace
         if address.startswith("Location: "):
-            address = address[len("Location: "):]
-
+            address = address[len("Location: ") :]
 
         if address == "":
             raise Exception("Could not parse location address (got empty string)")
