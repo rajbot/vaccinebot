@@ -32,6 +32,7 @@ def get_lat_long(a):
 def normalize(a):
     # requres libpostal c library to be installed
     from postal.parser import parse_address
+
     d = {k: v for (v, k) in parse_address(a)}
     return f"{d.get('house_number')} {d.get('road')}, {d.get('city')}, {d.get('state')} {d.get('postcode')}"
 
@@ -98,7 +99,7 @@ def canonicalize(a):
     '3410 west 3rd street, los angeles, ca 90020'
     """
 
-    #if a.startswith('45104 '):
+    # if a.startswith('45104 '):
     #    import pdb
     #    pdb.set_trace()
 
@@ -106,9 +107,9 @@ def canonicalize(a):
     if a.endswith(", united states"):
         a = a[: -len(", united states")]
 
-    a = re.sub(r"([^,])\n+", r"\1, ", a)    # newline instead of comma
-    a = re.sub(r",\s+,", ", ", a)            # repeated comma
-    a = re.sub(r"\s+, ", ", ", a)           # extra space around comma
+    a = re.sub(r"([^,])\n+", r"\1, ", a)  # newline instead of comma
+    a = re.sub(r",\s+,", ", ", a)  # repeated comma
+    a = re.sub(r"\s+, ", ", ", a)  # extra space around comma
 
     a = re.sub(r" e\.?(\W)? ", r" east\1 ", a, re.I)
     a = re.sub(r" w\.?(\W)? ", r" west\1 ", a)
@@ -126,20 +127,22 @@ def canonicalize(a):
     a = re.sub(r" st\.?(\W)", r" street\1", a)
     a = re.sub(r" wy\.?(\W)", r" way\1", a)
 
+    a = re.sub(r"([a-z]) dr\.?(\W)", r"\1 drive\2", a)  # "drive" not "doctor"
+
     a = re.sub(r" bldg\.?(\W)", r" building\1", a)
 
     # Use numeric version of street names.
     # i.e. "1st" instead of "first"
-    a = re.sub(r'(\W)first(\W)', r'\g<1>1st\g<2>', a)
-    a = re.sub(r'(\W)second(\W)', r'\g<1>2nd\g<2>', a)
-    a = re.sub(r'(\W)third(\W)', r'\g<1>3rd\g<2>', a)
-    a = re.sub(r'(\W)fourth(\W)', r'\g<1>4th\g<2>', a)
-    a = re.sub(r'(\W)fifth(\W)', r'\g<1>5th\g<2>', a)
-    a = re.sub(r'(\W)sixth(\W)', r'\g<1>6th\g<2>', a)
-    a = re.sub(r'(\W)seventh(\W)', r'\g<1>7th\g<2>', a)
-    a = re.sub(r'(\W)eighth(\W)', r'\g<1>8th\g<2>', a)
-    a = re.sub(r'(\W)ninth(\W)', r'\g<1>9th\g<2>', a)
-    a = re.sub(r'(\W)tenth(\W)', r'\g<1>10th\g<2>', a)
+    a = re.sub(r"(\W)first(\W)", r"\g<1>1st\g<2>", a)
+    a = re.sub(r"(\W)second(\W)", r"\g<1>2nd\g<2>", a)
+    a = re.sub(r"(\W)third(\W)", r"\g<1>3rd\g<2>", a)
+    a = re.sub(r"(\W)fourth(\W)", r"\g<1>4th\g<2>", a)
+    a = re.sub(r"(\W)fifth(\W)", r"\g<1>5th\g<2>", a)
+    a = re.sub(r"(\W)sixth(\W)", r"\g<1>6th\g<2>", a)
+    a = re.sub(r"(\W)seventh(\W)", r"\g<1>7th\g<2>", a)
+    a = re.sub(r"(\W)eighth(\W)", r"\g<1>8th\g<2>", a)
+    a = re.sub(r"(\W)ninth(\W)", r"\g<1>9th\g<2>", a)
+    a = re.sub(r"(\W)tenth(\W)", r"\g<1>10th\g<2>", a)
 
     a = re.sub(r"\s+", " ", a)
     return a
@@ -167,39 +170,39 @@ def address_line1(a):
     '45104 10th, lancaster, ca 93534'
     """
 
-    a = re.sub(r',? suite [0-9a-z]+,', ',', a)
+    a = re.sub(r",? suite [0-9a-z]+,", ",", a)
 
-    s = a.split(', ', 1)
+    s = a.split(", ", 1)
     if len(s) == 2:
         address = s[0]
-        address = re.sub(r' east$', r'', address)
-        address = re.sub(r'^east ', r'', address)
-        address = re.sub(r' east ', r' ', address)
+        address = re.sub(r" east$", r"", address)
+        address = re.sub(r"^east ", r"", address)
+        address = re.sub(r" east ", r" ", address)
 
-        address = re.sub(r' west$', r'', address)
-        address = re.sub(r'^west ', r'', address)
-        address = re.sub(r' west ', r' ', address)
+        address = re.sub(r" west$", r"", address)
+        address = re.sub(r"^west ", r"", address)
+        address = re.sub(r" west ", r" ", address)
 
-        address = re.sub(r' north$', r'', address)
-        address = re.sub(r'^north ', r'', address)
-        address = re.sub(r' north ', r' ', address)
+        address = re.sub(r" north$", r"", address)
+        address = re.sub(r"^north ", r"", address)
+        address = re.sub(r" north ", r" ", address)
 
-        address = re.sub(r' south$', r'', address)
-        address = re.sub(r'^south ', r'', address)
-        address = re.sub(r' south ', r' ', address)
+        address = re.sub(r" south$", r"", address)
+        address = re.sub(r"^south ", r"", address)
+        address = re.sub(r" south ", r" ", address)
 
         a = f"{address}, {s[1]}"
 
-    a = a.replace(' avenue,', ',')
-    a = a.replace(' boulevard,', ',')
-    a = a.replace(' center,', ',')
-    a = a.replace(' estates,', ',')
-    a = a.replace(' parkway,', ',')
-    a = a.replace(' road,', ',')
-    a = a.replace(' route,', ',')
-    a = a.replace(' suite,', ',')
-    a = a.replace(' street,', ',')
-    a = a.replace(' way,', ',')
+    a = a.replace(" avenue,", ",")
+    a = a.replace(" boulevard,", ",")
+    a = a.replace(" center,", ",")
+    a = a.replace(" estates,", ",")
+    a = a.replace(" parkway,", ",")
+    a = a.replace(" road,", ",")
+    a = a.replace(" route,", ",")
+    a = a.replace(" suite,", ",")
+    a = a.replace(" street,", ",")
+    a = a.replace(" way,", ",")
 
     return a
 

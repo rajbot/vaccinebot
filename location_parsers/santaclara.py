@@ -57,7 +57,6 @@ def run():
     options = fieldset.find_all_next("option")
     for o in options:
         if ", CA" in o.string:
-            print(o.string)
             name, address, extra = re.split("[\(\)]", o.string)
             l = Location(name=name.strip(), address=address, county=county.name)
             locations.append(l)
