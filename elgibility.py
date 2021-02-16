@@ -19,6 +19,9 @@ def verify_locations(db, name, info):
         if system_name in info.get("overrides", []):
             age = info["overrides"][system_name]
 
+        if db_loc["id"] in info.get("location_overrides", []):
+            age = info["location_overrides"][db_loc["id"]]
+
         availability_str = f"Yes: vaccinating {age}+"
 
         has_vaccine = False

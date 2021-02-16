@@ -12,15 +12,18 @@ def run(county):
 
     soup = BeautifulSoup(r.data, "lxml")
 
-    age_element = soup.find("p", string=re.compile("including persons 65\+"))
+    age_element = soup.find("em", string=re.compile("We are currently in Phase 1A, all tiers and Phase1B tier 1"))
     if age_element is None:
         raise Exception(
-            f"Could not parse elgibilty for Butte County. Elgiblity criteria might have changed!"
+            f"Could not parse elgibilty for El Dorado County. Elgiblity criteria might have changed!"
         )
 
     # TODO: parse kaiser and onemedical. Hardcoded for now
     return {
-        "elgibility_age": 65,
+        "elgibility_age": 75,
+        "location_overrides": {
+            "rec1eeCGaqqSWzUTU": 65,
+        }
     }
 
 
@@ -29,5 +32,5 @@ if __name__ == "__main__":
     sys.path.append("..")
     from counties import counties
 
-    age = run(counties["butte"])
+    age = run(counties["eldorado"])
     print(age)
