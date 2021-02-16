@@ -12,6 +12,7 @@ counties = {
     "contracosta": County(
         name="Contra Costa", url="https://www.coronavirus.cchealth.org/vaccine"
     ),
+    "delnorte": County(name="Del Norte", url="https://www.covid19.dnco.org/vaccines"),
     "sanfrancisco": County(
         name="San Francisco", url="https://sf.gov/get-vaccinated-against-covid-19"
     ),
