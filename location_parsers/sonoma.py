@@ -85,7 +85,7 @@ def address_fixup(a):
     # However, our records have the health center's address.
     a = a.replace(
         "680 Sonoma Mountain Parkway, Building 800, Petaluma",
-        "1179 N McDowell Blvd, Petaluma, CA 94954"
+        "1179 N McDowell Blvd, Petaluma, CA 94954",
     )
 
     return a

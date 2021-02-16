@@ -12,9 +12,12 @@ def run(county):
         "elgibility_age": 65,
     }
 
+
 if __name__ == "__main__":
     import sys
-    sys.path.append('..')
+
+    sys.path.append("..")
     from counties import counties
+
     age = run(counties["contracosta"])
     print(age)

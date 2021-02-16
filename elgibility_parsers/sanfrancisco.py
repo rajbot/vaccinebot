@@ -15,13 +15,15 @@ def run(county):
 
     age_li = soup.find("li", string="65 years and older")
     if age_li is None:
-        raise Exception("Could not parse elgibilty for San Francisco County. Elgiblity criteria might have changed!")
+        raise Exception(
+            "Could not parse elgibilty for San Francisco County. Elgiblity criteria might have changed!"
+        )
 
     # TODO: parse kaiser and onemedical. Hardcoded for now
     return {
         "elgibility_age": 65,
-        "overrides" : {
+        "overrides": {
             "kaiser": 75,
             "onemedical": 75,
-        }
+        },
     }

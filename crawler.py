@@ -21,9 +21,7 @@ parser.add_argument(
 parser.add_argument(
     "--add-records", action="store_true", help="Add new locations found to Airtable"
 )
-parser.add_argument(
-    "--mode", nargs=1, help="Can be either 'location' or 'elgibility'"
-)
+parser.add_argument("--mode", nargs=1, help="Can be either 'location' or 'elgibility'")
 args = parser.parse_args()
 
 level = logging.INFO
@@ -56,7 +54,7 @@ logging.info(f'loaded {len(db["content"])} locations')
 
 
 # Only verify eligibility of current locations
-if args.mode[0] == 'elgibility':
+if args.mode[0] == "elgibility":
     elgibility.run(db, county)
     sys.exit(0)
 

@@ -28,7 +28,9 @@ def verify_locations(db, name, info):
 
         if has_vaccine and availability_str not in db_loc.get("Availability Info", []):
             logging.error("\t---------------------")
-            logging.error(f"\tWrong elgibility listed for {db_loc['Name']}({db_loc.get('Address', '')})")
+            logging.error(
+                f"\tWrong elgibility listed for {db_loc['Name']}({db_loc.get('Address', '')})"
+            )
             logging.error(f"\tInfo in db: {db_loc['Availability Info']}")
             logging.error(f"\tShould include {availability_str}")
             logging.error(f"\tLocation id: {db_loc['id']}")

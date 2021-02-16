@@ -14,16 +14,21 @@ def run(county):
 
     age_element = soup.find("p", string=re.compile("including persons 65\+"))
     if age_element is None:
-        raise Exception(f"Could not parse elgibilty for Butte County. Elgiblity criteria might have changed!")
+        raise Exception(
+            f"Could not parse elgibilty for Butte County. Elgiblity criteria might have changed!"
+        )
 
     # TODO: parse kaiser and onemedical. Hardcoded for now
     return {
         "elgibility_age": 65,
     }
 
+
 if __name__ == "__main__":
     import sys
-    sys.path.append('..')
+
+    sys.path.append("..")
     from counties import counties
+
     age = run(counties["butte"])
     print(age)
