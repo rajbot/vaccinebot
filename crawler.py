@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import locations
 import argparse
 import importlib
 import json
@@ -10,6 +9,8 @@ import pkgutil
 import sys
 import urllib.request
 
+import elgibility
+import locations
 import location_parsers
 
 parser = argparse.ArgumentParser(description="VaccinateCA crawler.")
@@ -19,6 +20,9 @@ parser.add_argument(
 )
 parser.add_argument(
     "--add-records", action="store_true", help="Add new locations found to Airtable"
+)
+parser.add_argument(
+    "--mode", nargs=1, help="Can be either 'location' or 'elgibility'"
 )
 args = parser.parse_args()
 
@@ -50,10 +54,18 @@ with urllib.request.urlopen(
 
 logging.info(f'loaded {len(db["content"])} locations')
 
+
+# Only verify eligibility of current locations
+if args.mode[0] == 'elgibility':
+    elgibility.run(db)
+    sys.exit(0)
+
+
 # add canonicalized address to db dict
 locations.cannonicalize_db(db)
 
 
+# Crawl county sites and check for new clinic locations
 # dynamically load each county module and parse location data
 for modinfo in pkgutil.iter_modules(location_parsers.__path__):
     m = importlib.import_module(f".{modinfo.name}", "location_parsers")
