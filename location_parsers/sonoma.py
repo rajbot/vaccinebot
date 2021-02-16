@@ -31,10 +31,6 @@ def address_fixup(a):
         "5401 Snyder Lane, Rohnert Park", "5401 Snyder Lane, Rohnert Park, CA 94928"
     )
     a = a.replace(
-        "680 Sonoma Mountain Parkway, Building 800, Petaluma",
-        "680 Sonoma Mountain Parkway, Building 800, Petaluma, CA 94954",
-    )
-    a = a.replace(
         "16405 River Road, Guerneville", "16405 River Road, Guerneville, CA 95446"
     )
     a = a.replace(
@@ -84,6 +80,14 @@ def address_fixup(a):
         "14630 Armstrong Woods Road, Guerneville",
         "14630 Armstrong Woods Road, Guerneville, CA 95446",
     )
+
+    # For Petaluma Health Center, the county lists the address for Petaluma Fitness Center
+    # However, our records have the health center's address.
+    a = a.replace(
+        "680 Sonoma Mountain Parkway, Building 800, Petaluma",
+        "1179 N McDowell Blvd, Petaluma, CA 94954"
+    )
+
     return a
 
 
