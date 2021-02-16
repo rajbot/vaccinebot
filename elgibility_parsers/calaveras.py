@@ -11,17 +11,19 @@ def run(county):
     r = http.request("GET", county.url)
 
     soup = BeautifulSoup(r.data, "lxml")
-    locations = []
 
-    age_element = soup.find("h4", string=re.compile("Phase 1b: 65\+"))
+    age_element = soup.find("span", string=re.compile("Persons 65 and older interested in getting the COVID-19 vaccine"))
     if age_element is None:
-        raise Exception(f"Could not parse elgibilty for Alameda County. Elgiblity criteria might have changed!")
+        raise Exception(f"Could not parse elgibilty for Butte County. Elgiblity criteria might have changed!")
 
     # TODO: parse kaiser and onemedical. Hardcoded for now
     return {
         "elgibility_age": 65,
-        "overrides" : {
-            "kaiser": 75,
-            "onemedical": 75,
-        }
     }
+
+if __name__ == "__main__":
+    import sys
+    sys.path.append('..')
+    from counties import counties
+    age = run(counties["calaveras"])
+    print(age)

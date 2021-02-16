@@ -57,7 +57,7 @@ logging.info(f'loaded {len(db["content"])} locations')
 
 # Only verify eligibility of current locations
 if args.mode[0] == 'elgibility':
-    elgibility.run(db)
+    elgibility.run(db, county)
     sys.exit(0)
 
 
