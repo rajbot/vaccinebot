@@ -20,6 +20,9 @@ parser.add_argument(
 parser.add_argument(
     "--add-records", action="store_true", help="Add new locations found to Airtable"
 )
+parser.add_argument(
+    "--print-tsv", action="store_true", help="Print fuzzy matches in TSV format"
+)
 args = parser.parse_args()
 
 level = logging.INFO
@@ -74,19 +77,22 @@ for modinfo in pkgutil.iter_modules(location_parsers.__path__):
     # check to see if these locations are already in the database
     num_found = 0
     for location in locs:
-        found = locations.in_db(location, db)
+        found, match_id = locations.in_db(location, db)
 
-        if not found:
-            if not args.add_records:
-                logging.warning(
-                    f"\t{location.name}, {location.address} was not found in database! Please add it manually."
-                )
-            else:
+        if found:
+            num_found += 1
+
+        if args.print_tsv:
+            locations.print_fuzzy_tsv(location, db["content"], match_id)
+        elif not found:
+            if args.add_records:
                 locations.print_fuzzy_matches(location, db["content"])
                 response = input("Add this record to Airtable? (y/n):")
                 if response == "y":
                     locations.airtable_insert(location)
-        else:
-            num_found += 1
+            else:
+                logging.warning(
+                    f"\t{location.name}, {location.address} was not found in database! Please add it manually."
+                )
 
     logging.info(f"\t{num_found} locations already in database")

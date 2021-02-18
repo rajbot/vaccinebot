@@ -26,8 +26,10 @@ Location = namedtuple(
         "hours",
         "lat",
         "long",
+        "zip",
+        "org_name",
     ],
-    defaults=[None] * 9,
+    defaults=[None] * 11,
 )
 
 

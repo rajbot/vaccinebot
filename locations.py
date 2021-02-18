@@ -6,7 +6,7 @@ import re
 import sys
 
 max_distance = 10
-max_address_difference = 50
+max_address_difference = 10
 
 api_key = os.environ.get("AIRTABLE_API_KEY")
 base_id = os.environ.get("AIRTABLE_BASE_ID")
@@ -207,20 +207,38 @@ def address_line1(a):
     return a
 
 
+# address_line1_min()
+# ________________________________________________________________________________________
+def address_line1_min(a):
+    """Return only a minimal version of an address
+
+    >>> address_line1_min('1001 Potrero Ave GR-1, San Francisco, CA 94110')
+    '1001 potrero san francisco, ca 94110'
+
+    """
+    line1 = address_line1(canonicalize(a))
+    m = re.match(".*?(\d+\s+\w+?)\s.*?((?:san |santa |los )\w+, ca \d{5})", line1)
+
+    if m is not None:
+        return f"{m.group(1)} {m.group(2)}"
+    return line1
+
+
 # in_db()
 # ________________________________________________________________________________________
 def in_db(location, db):
     """Return True if location is already in airtable"""
 
-    loc_address = address_line1(canonicalize(location.address))
+    # loc_address = address_line1(canonicalize(location.address))
+    loc_address = address_line1_min(canonicalize(location.address))
 
     for db_loc in db["content"]:
         # match on canonicalized address field
         db_address = db_loc["address_line1"]
         if db_address == loc_address:
-            return True
+            return True, db_loc["id"]
 
-    return False
+    return False, None
 
 
 # cannonicalize_db()
@@ -228,7 +246,8 @@ def in_db(location, db):
 def cannonicalize_db(db):
     for db_loc in db["content"]:
         db_address = db_loc.get("Address", "")
-        a = address_line1(canonicalize(db_address))
+        # a = address_line1(canonicalize(db_address))
+        a = address_line1_min(canonicalize(db_address))
         db_loc["address_line1"] = a
 
 
@@ -265,6 +284,44 @@ def print_fuzzy_matches(location, table):
             print()
     else:
         print("No existing locations found for this location")
+
+
+# print_fuzzy_tsv()
+# ________________________________________________________________________________________
+def print_fuzzy_tsv(location, table, match_id):
+    name = location.name.replace("\t", " ").replace("\n", " ")
+    address = location.address.replace("\t", " ").replace("\n", ", ")
+    org_name = location.org_name.replace("\t", " ").replace("\n", " ")
+    zip = location.zip
+
+    cols = [org_name, name, address, zip]
+    if match_id is None:
+        cols.append("")
+    else:
+        cols.append(match_id)
+
+    fuzzy_match_ids = []
+    if match_id is None:
+        for db_loc in table:
+            address = location.address.lower()
+            db_address = db_loc.get("Address", "").lower()
+            if db_address == "":
+                continue
+            if editdistance.eval(address, db_address) < max_distance:
+                num1 = address.split()[0]
+                num2 = db_address.split()[0]
+                num1 = int(re.sub("[^0-9]", "", num1))
+                try:
+                    num2 = int(re.sub("[^0-9]", "", num2))
+                except ValueError:
+                    continue
+                if abs(num1 - num2) < max_address_difference:
+                    # cols.append(f"{db_loc['Name']}, {db_loc['Address']}")
+                    fuzzy_match_ids.append(db_loc["id"])
+        if len(fuzzy_match_ids) > 0:
+            cols.append(", ".join(fuzzy_match_ids))
+
+    print("\t".join(cols))
 
 
 # airtable_insert()
