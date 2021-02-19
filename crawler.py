@@ -21,7 +21,7 @@ parser.add_argument(
     "--add-records", action="store_true", help="Add new locations found to Airtable"
 )
 parser.add_argument(
-    "--print-tsv", action="store_true", help="Print fuzzy matches in TSV format"
+    "--print-tsv", action="store_true", help="Print results in TSV format"
 )
 args = parser.parse_args()
 

@@ -11,6 +11,7 @@ optional arguments:
   -c COUNTY, --county COUNTY
                         Run crawler only for the specified county
   --add-records         Add new locations found to Airtable
+  --print-tsv           Print results in TSV format
 ```
 
 
