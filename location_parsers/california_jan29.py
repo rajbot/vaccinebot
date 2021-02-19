@@ -32,22 +32,29 @@ def run():
     http = urllib3.PoolManager(headers=header_dict)  # set user-agent
     url_fmt = "https://services.arcgis.com/BLN4oKB0N1YSgvY8/arcgis/rest/services/CDPH_ApprovedVaccinationLocations_Final_20210129/FeatureServer/0/query?f=json&where=1%3D1&outFields=*&resultOffset={}&resultRecordCount=50"
 
-#    url_fmt = "https://services.arcgis.com/BLN4oKB0N1YSgvY8/arcgis/rest/services/CDPH_Vaccination_Locations_20210210/FeatureServer/0/query?f=json&where=1%3D1&outFields=*&resultOffset={}&resultRecordCount=50"
+    counts_url = url_fmt.format(0) + "&returnCountOnly=true"
+    r = http.request("GET", counts_url)
+    obj = json.loads(r.data.decode("utf-8"))
+    num_features = obj["count"]
 
     locations = []
     seen_addresses = set()
 
     # for i in range(0, 50, 50):
-    for i in range(0, 4700, 50):
-        url = url_fmt.format(i) 
+    for i in range(0, num_features, 50):
+        url = url_fmt.format(i)
         r = http.request("GET", url)
         obj = json.loads(r.data.decode("utf-8"))
         for feature in obj["features"]:
             a = feature["attributes"]
             zip = str(a["USER_Zip"] or "99999")
             zip = zip_fixup(zip)
-            if(a['USER_Street'] == None and a['USER_City'] == None and a['USER_State'] == None):
-               continue
+            if (
+                a["USER_Street"] == None
+                and a["USER_City"] == None
+                and a["USER_State"] == None
+            ):
+                continue
 
             address = f"{a['USER_Street'].strip()}, {a['USER_City'].strip()}, {a['USER_State'].strip()} {zip}"
             address = address_fixup(address)
@@ -62,7 +69,7 @@ def run():
                 address=address,
                 county=a["USER_County"].strip(),
                 zip=zip,
-                org_name="" #a["USER_Organization_Name"].strip(),
+                org_name="",  # a["USER_Organization_Name"].strip(),
             )
             locations.append(l)
 

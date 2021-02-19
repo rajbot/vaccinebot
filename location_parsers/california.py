@@ -33,11 +33,16 @@ def run():
 
     url_fmt = "https://services.arcgis.com/BLN4oKB0N1YSgvY8/arcgis/rest/services/CDPH_Vaccination_Locations_20210210/FeatureServer/0/query?f=json&where=1%3D1&outFields=*&resultOffset={}&resultRecordCount=50"
 
+    counts_url = url_fmt.format(0) + "&returnCountOnly=true"
+    r = http.request("GET", counts_url)
+    obj = json.loads(r.data.decode("utf-8"))
+    num_features = obj["count"]
+
     locations = []
     seen_addresses = set()
 
     # for i in range(0, 50, 50):
-    for i in range(0, 2392, 50):
+    for i in range(0, num_features, 50):
         url = url_fmt.format(i)
         r = http.request("GET", url)
         obj = json.loads(r.data.decode("utf-8"))
