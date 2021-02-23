@@ -1,7 +1,7 @@
 # Usage
 
 ```
-usage: crawler.py [-h] [-v] [-c COUNTY] [--add-records]
+usage: crawler.py [-h] [-v] [-c COUNTY] [--add-records] [--print-tsv] [--webhook-notify]
 
 VaccinateCA crawler.
 
@@ -12,6 +12,7 @@ optional arguments:
                         Run crawler only for the specified county
   --add-records         Add new locations found to Airtable
   --print-tsv           Print results in TSV format
+  --webhook-notify      Notify via webhook if new locations are found
 ```
 
 

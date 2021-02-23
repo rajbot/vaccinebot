@@ -9,6 +9,7 @@ import os
 import pkgutil
 import sys
 import urllib.request
+import webhook
 
 import location_parsers
 
@@ -22,6 +23,11 @@ parser.add_argument(
 )
 parser.add_argument(
     "--print-tsv", action="store_true", help="Print results in TSV format"
+)
+parser.add_argument(
+    "--webhook-notify",
+    action="store_true",
+    help="Notify via webhook if new locations are found",
 )
 args = parser.parse_args()
 
@@ -43,6 +49,10 @@ if args.county is not None:
 
 if args.add_records:
     locations.validate_env_vars()
+
+if args.webhook_notify:
+    if os.environ.get("WEBHOOK_NOTIFY_URL") is None:
+        sys.exit("Must set WEBHOOK_NOTIFY_URL env var")
 
 
 logging.info("Downloading known locations")
@@ -94,5 +104,8 @@ for modinfo in pkgutil.iter_modules(location_parsers.__path__):
                 logging.warning(
                     f"\t{location.name}, {location.address} was not found in database! Please add it manually."
                 )
+
+                if args.webhook_notify:
+                    webhook.notify(m.county.name, location.name, location.address)
 
     logging.info(f"\t{num_found} locations already in database")
