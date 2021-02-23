@@ -22,6 +22,17 @@ county = County(
 )
 
 
+def address_fixup(a):
+    """ Some Kern Co. addresses have typos. """
+
+    a = a.replace(
+        "2901 Silent Ave Suite 201, Bakersfield, CA 93308",
+        "2901 Sillect Ave Suite 201, Bakersfield, CA 93308",
+    )
+
+    return a
+
+
 # Returns a list of Location objects
 def run():
     dir = tempfile.TemporaryDirectory()
@@ -93,10 +104,14 @@ def run():
             url = None
             if row["Online Registration"] != "":
                 url = row["Online Registration"].strip()
+
+            address = f'{row["Address"].strip()}, {row["City"].strip()}, CA {row["Zip Code"].strip()}'
+            address = address_fixup(address)
+
             locations.append(
                 Location(
                     name=row["Facility Name"].strip(),
-                    address=f'{row["Address"].strip()}, {row["City"].strip()}, CA {row["Zip Code"].strip()}',
+                    address=address,
                     url=url,
                     phone=row["Phone Number"].strip(),
                     hours=row["Hours"].strip(),
