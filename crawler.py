@@ -80,6 +80,8 @@ for modinfo in pkgutil.iter_modules(location_parsers.__path__):
         logging.error(
             f"\tParser for {m.county.name} County failed! Please fix this parser. Err: {e}"
         )
+        if args.webhook_notify:
+            webhook.notify_broken(m.county.name)
         continue
 
     logging.info(f"\tParsed {len(locs)} locations")

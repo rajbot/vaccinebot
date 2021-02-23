@@ -22,6 +22,7 @@ optional arguments:
 - If you are using the `--add-records` flag, you will need to set the following:
     - `AIRTABLE_API_KEY` and `AIRTABLE_BASE_ID` for writing to AirTable
     - `MAPQUEST_API_KEY` for looking up lat/long
+- If you are using the `--webhook-notify` flag, you will need to set `WEBHOOK_NOTIFY_URL`
 
 
 # Install and run on OS X

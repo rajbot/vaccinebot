@@ -18,3 +18,19 @@ def notify(county, name, address):
     r = http.request(
         "POST", url, body=encoded_data, headers={"Content-Type": "application/json"}
     )
+
+
+def notify_broken(county):
+    http = urllib3.PoolManager()
+    url = os.environ["WEBHOOK_NOTIFY_URL"]
+
+    data = {
+        "username": "VaccineBot",
+        "content": f"The parser for {county} county is broken! Please fix it.",
+    }
+
+    encoded_data = json.dumps(data).encode("utf-8")
+
+    r = http.request(
+        "POST", url, body=encoded_data, headers={"Content-Type": "application/json"}
+    )
