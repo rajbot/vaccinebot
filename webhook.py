@@ -3,7 +3,7 @@ import os
 import urllib3
 
 
-def notify(county, name, address):
+def notify(county, name, address, fuzzy_matches):
     http = urllib3.PoolManager()
     url = os.environ["WEBHOOK_NOTIFY_URL"]
 
@@ -12,6 +12,13 @@ def notify(county, name, address):
         "content": f"New Site Found in {county} county!",
         "embeds": [{"title": name, "description": address}],
     }
+
+    for i, m in enumerate(fuzzy_matches):
+        loc = {
+            "title": f"Possible match #{i+1}",
+            "description": f"{m['Name']}, {m['Address']}",
+        }
+        data["embeds"].append(loc)
 
     encoded_data = json.dumps(data).encode("utf-8")
 

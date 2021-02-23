@@ -251,14 +251,9 @@ def cannonicalize_db(db):
         db_loc["address_line1"] = a
 
 
-# print_fuzzy_matches()
+# get_fuzzy_matches()
 # ________________________________________________________________________________________
-def print_fuzzy_matches(location, table):
-    print("New location found:")
-    print(f"\t{location.name}")
-    print(f"\t{location.address}")
-    print("-" * 80)
-
+def get_fuzzy_matches(location, table):
     matches = []
     for db_loc in table:
         address = location.address.lower()
@@ -275,6 +270,19 @@ def print_fuzzy_matches(location, table):
                 continue
             if abs(num1 - num2) < max_address_difference:
                 matches.append(db_loc)
+
+    return matches
+
+
+# print_fuzzy_matches()
+# ________________________________________________________________________________________
+def print_fuzzy_matches(location, table):
+    print("New location found:")
+    print(f"\t{location.name}")
+    print(f"\t{location.address}")
+    print("-" * 80)
+
+    matches = get_fuzzy_matches(location, table)
 
     if len(matches) > 0:
         print("Possible matches for new location:")

@@ -108,6 +108,9 @@ for modinfo in pkgutil.iter_modules(location_parsers.__path__):
                 )
 
                 if args.webhook_notify:
-                    webhook.notify(m.county.name, location.name, location.address)
+                    fuzzy_matches = locations.get_fuzzy_matches(location, db["content"])
+                    webhook.notify(
+                        m.county.name, location.name, location.address, fuzzy_matches
+                    )
 
     logging.info(f"\t{num_found} locations already in database")
