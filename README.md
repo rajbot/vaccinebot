@@ -1,7 +1,7 @@
 # Usage
 
 ```
-usage: crawler.py [-h] [-v] [-c COUNTY] [--add-records] [--print-tsv] [--webhook-notify]
+usage: crawler.py [-h] [-v] [-c COUNTY] [-s STATE_PARSER] [--add-records] [--print-tsv] [--webhook-notify]
 
 VaccinateCA crawler.
 
@@ -10,6 +10,8 @@ optional arguments:
   -v, --verbose
   -c COUNTY, --county COUNTY
                         Run crawler only for the specified county
+  -s STATE_PARSER, --state-parser STATE_PARSER
+                        Run a state-wide parser
   --add-records         Add new locations found to Airtable
   --print-tsv           Print results in TSV format
   --webhook-notify      Notify via webhook if new locations are found
@@ -84,6 +86,13 @@ python3 -m location_parsers.eldorado
 
 # Selenium-based parser
 python3 -m location_parsers.mono
+```
+
+
+# Run a single county or state-wide parser
+```bash
+python3 crawler.py --county="San Francisco"
+python3 crawler.py --state-parser="california"
 ```
 
 

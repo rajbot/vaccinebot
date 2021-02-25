@@ -3,13 +3,13 @@ import os
 import urllib3
 
 
-def notify(county, name, address, fuzzy_matches):
+def notify(place_name, name, address, fuzzy_matches):
     http = urllib3.PoolManager()
     url = os.environ["WEBHOOK_NOTIFY_URL"]
 
     data = {
         "username": "VaccineBot",
-        "content": f"New Site Found in {county} county!",
+        "content": f"New Site Found in {place_name}!",
         "embeds": [{"title": name, "description": address}],
     }
 
@@ -27,13 +27,13 @@ def notify(county, name, address, fuzzy_matches):
     )
 
 
-def notify_broken(county):
+def notify_broken(place_name):
     http = urllib3.PoolManager()
     url = os.environ["WEBHOOK_NOTIFY_URL"]
 
     data = {
         "username": "VaccineBot",
-        "content": f"The parser for {county} county is broken! Please fix it.",
+        "content": f"The parser for {place_name} is broken! Please fix it.",
     }
 
     encoded_data = json.dumps(data).encode("utf-8")

@@ -1,9 +1,11 @@
 from airtable import Airtable
 import editdistance
 import geocoder
+import logging
 import os
 import re
 import sys
+import webhook
 
 max_distance = 10
 max_address_difference = 10
@@ -359,3 +361,36 @@ def airtable_insert(location):
             "Longitude": long,
         }
     )
+
+
+# find_matches()
+# _________________________________________________________________________________________
+def find_matches(locs, db, args, place_name):
+    # check to see if these locations are already in the database
+    num_found = 0
+    for location in locs:
+        found, match_id = in_db(location, db)
+
+        if found:
+            num_found += 1
+
+        if args.print_tsv:
+            print_fuzzy_tsv(location, db["content"], match_id)
+        elif not found:
+            if args.add_records:
+                print_fuzzy_matches(location, db["content"])
+                response = input("Add this record to Airtable? (y/n):")
+                if response == "y":
+                    airtable_insert(location)
+            else:
+                logging.warning(
+                    f"\t{location.name}, {location.address} was not found in database! Please add it manually."
+                )
+
+                if args.webhook_notify:
+                    fuzzy_matches = get_fuzzy_matches(location, db["content"])
+                    webhook.notify(
+                        place_name, location.name, location.address, fuzzy_matches
+                    )
+
+    logging.info(f"\t{num_found} locations already in database")

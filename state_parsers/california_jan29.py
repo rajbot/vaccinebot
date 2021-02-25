@@ -1,6 +1,6 @@
-# Parse vaccination site locations for San Diego County
+# Parse vaccination site locations for an arcgis dump from CA on Jan 29
 
-# Run manually: python3 -m location_parsers.sandiego
+# Run manually: python3 -m state_parsers.california_jan29
 
 import csv
 import os
@@ -9,11 +9,11 @@ import re
 import time
 import urllib3
 
-from . import County, Location
+from . import Parser, Location
 from . import header_dict, debug_print
 from . import add_state, validate
 
-county = County(name="California", url=None)
+parser = Parser(name="California_Jan29", url=None)
 
 
 def address_fixup(a):
@@ -30,8 +30,7 @@ def zip_fixup(z):
 # Returns a list of json objects
 def run():
     http = urllib3.PoolManager(headers=header_dict)  # set user-agent
-
-    url_fmt = "https://services.arcgis.com/BLN4oKB0N1YSgvY8/arcgis/rest/services/CDPH_Vaccination_Locations_20210210/FeatureServer/0/query?f=json&where=1%3D1&outFields=*&resultOffset={}&resultRecordCount=50"
+    url_fmt = "https://services.arcgis.com/BLN4oKB0N1YSgvY8/arcgis/rest/services/CDPH_ApprovedVaccinationLocations_Final_20210129/FeatureServer/0/query?f=json&where=1%3D1&outFields=*&resultOffset={}&resultRecordCount=50"
 
     counts_url = url_fmt.format(0) + "&returnCountOnly=true"
     r = http.request("GET", counts_url)
@@ -46,12 +45,19 @@ def run():
         url = url_fmt.format(i)
         r = http.request("GET", url)
         obj = json.loads(r.data.decode("utf-8"))
-
         for feature in obj["features"]:
             a = feature["attributes"]
-            address = f"{a['Street'].strip()}, {a['City'].strip()}, {a['State'].strip()} {a['Zip'].strip()}"
+            zip = str(a["USER_Zip"] or "99999")
+            zip = zip_fixup(zip)
+            if (
+                a["USER_Street"] == None
+                and a["USER_City"] == None
+                and a["USER_State"] == None
+            ):
+                continue
+
+            address = f"{a['USER_Street'].strip()}, {a['USER_City'].strip()}, {a['USER_State'].strip()} {zip}"
             address = address_fixup(address)
-            zip = zip_fixup(a["Zip"].strip())
 
             if address in seen_addresses:
                 continue
@@ -59,11 +65,11 @@ def run():
             seen_addresses.add(address)
 
             l = Location(
-                name=a["Location_Name"].strip(),
+                name=a["USER_Location_Name"].strip(),
                 address=address,
-                county=a["County"].strip(),
+                county=a["USER_County"].strip(),
                 zip=zip,
-                org_name=a["Organization_Name"].strip(),
+                org_name="",  # a["USER_Organization_Name"].strip(),
             )
             locations.append(l)
 
