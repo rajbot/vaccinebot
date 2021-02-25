@@ -30,6 +30,21 @@ def address_fixup(a):
         "2901 Sillect Ave Suite 201, Bakersfield, CA 93308",
     )
 
+    a = a.replace(
+        "3300 BUENA VISTA RD A, Bakersfield, CA 93311",
+        "3300 Buena Vista Rd Bldg A, Bakersfield, CA 93311",
+    )
+
+    a = a.replace(
+        "8000 WHITE LANE, Bakersfield, CA 93301",
+        "8000 WHITE LANE, BAKERSFIELD, CA 93309",
+    )
+
+    a = a.replace(
+        "Rite Aid Store 06303, Bakersfield, CA 93313",
+        "3225 PANAMA LANE, BAKERSFIELD, CA 93313",
+    )
+
     return a
 
 

@@ -34,16 +34,25 @@ def run():
             if obj['state'] != "CA":
                 continue
             address = obj["street_address_1"].strip()
+
+            if address == "":
+                continue
+
             if obj["street_address_2"] is not None and obj["street_address_2"].strip() != "":
                 address += f", {obj['street_address_2'].strip()}"
             address += f", {obj['city']}, {obj['state']} {obj['postal_code']}"
+
+            county = obj.get("county")
+            if county is None:
+                county = ""
 
             l = Location(
                 name=obj["name"],
                 address=address,
                 zip=obj['postal_code'],
-                county=obj.get("county"),
+                county=county,
                 org_name="",
+                url=f"https://curative.com/sites/{obj['id']}",
             )
             locations.append(l)
 

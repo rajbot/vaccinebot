@@ -304,8 +304,11 @@ def print_fuzzy_tsv(location, table, match_id):
     org_name = location.org_name.replace("\t", " ").replace("\n", " ")
     zip = location.zip
     county = location.county
+    url = location.url
+    if url is None:
+        url = ""
 
-    cols = [org_name, name, address, zip, county]
+    cols = [url, org_name, name, address, zip, county]
     if match_id is None:
         cols.append("")
     else:
