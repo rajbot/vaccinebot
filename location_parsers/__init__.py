@@ -65,6 +65,9 @@ def driver_stop(driver, display):
     if headless_mode:
         display.stop()
 
+def add_comma(address):
+    """fix any addresses that are missing a comma between the city and state"""
+    return re.sub(r"(\w) CA", r"\1, CA", address)
 
 def add_state(address):
     """fix any addresses with missing state"""
