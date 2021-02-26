@@ -29,6 +29,11 @@ def add_state(address):
     """fix any addresses with missing state"""
     return re.sub(r", (9\d{4})$", r", CA \1", address.strip())
 
+# Given a 9 digit zipcode, returns the first 5 digits
+# Will be a no-op for 5 digit zips
+def trim_zip_code(zip_code):
+    zip_code = zip_code.strip()
+    return zip_code.split("-")[0]
 
 def validate(locations):
     for l in locations:
