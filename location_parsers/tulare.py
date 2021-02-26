@@ -6,7 +6,7 @@ import time
 
 from . import County, Location
 from . import driver_start, driver_stop
-from . import validate
+from . import debug_print, validate
 
 county = County(
     name="Tulare",
@@ -29,9 +29,11 @@ def run():
         for row in rows:
             columns = row.find_elements_by_tag_name("td")
             name = columns[0].text
+            link = columns[0].find_elements_by_tag_name("a")[0]
+            url = link.get_attribute("href") or None
             address = columns[1].text.replace("\n", ", ").replace(" CA, ", " CA ")
             locations.append(
-                Location(name=name, address=address, county=county.name, url=None)
+                Location(name=name, address=address, county=county.name, url=url)
             )
 
     while True:
@@ -52,4 +54,4 @@ def run():
 
 if __name__ == "__main__":
     locations = run()
-    print(locations)
+    debug_print(locations)
