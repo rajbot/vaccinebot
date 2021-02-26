@@ -6,6 +6,7 @@ import glob
 import os
 import json
 import re
+import zipcodes
 
 from . import Parser, Location
 from . import header_dict, debug_print
@@ -94,6 +95,11 @@ def run():
             if zip_code is None:
                 continue
 
+            county = None
+            region = zipcodes.matching(zip_code)
+            if len(region) > 0:
+                county = region[0].get("county")
+
             zip_code = trim_zip_code(zip_code)
 
             state = provider.get("state")
@@ -109,6 +115,7 @@ def run():
                 phone=provider.get("phone"),
                 lat=provider.get("lat"),
                 long=provider.get("long"),
+                county=county,
                 # Fields from the higher fidelity data
                 url=provider.get("website"),
                 reservation_url=provider.get("prescreening_site"),
