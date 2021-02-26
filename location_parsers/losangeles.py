@@ -55,6 +55,23 @@ def address_fixup(a):
         "16830 San Fernando Mission Blvd, Los Angeles, CA 91344",
         "16830 San Fernando Mission Blvd, Granada Hills, CA 91344",
     )
+    a = a.replace(
+        "8810 Tampa Ave, , Los Angeles, CA 91324",
+        "8810 Tampa Ave, Northridge, CA 91324",
+    )
+
+    a = a.replace(
+        "1030 W Gardena Blvd Gardena CA. 90247",
+        "1030 W Gardena Blvd, Gardena, CA 90247",
+    )
+    a = a.replace(
+        "1030 W Gardena Blvd Gardena, CA 90247",
+        "1030 W Gardena Blvd, Gardena, CA 90247",
+    )
+
+    a = a.replace(",,", ",")
+    a = a.replace(". ,", ".,")
+
     return a
 
 
