@@ -41,89 +41,69 @@ def format_hours(provider):
 
 
 def run():
-    path = os.path.expanduser("~/dev/feed-recordings/vaccine-finder/*.json")
+    path = os.path.expanduser("~/dev/raw-feed-data/vaccine-finder/providers/*.json")
 
     locations = []
-    for file in glob.iglob(path):
-        fh = open(file)
-        obj = json.load(fh)
+    for provider_path in glob.iglob(path):
+        fh = open(provider_path)
+        provider = json.load(fh)
         fh.close()
 
-        providers = obj.get("providers")
+        name = provider.get("name")
+        if name is None:
+            continue
 
-        for p in providers:
-            guid = p.get("guid")
-            if guid is None:
-                continue
+        address = provider.get("address1")
+        if address is None:
+            continue
 
-            provider_path = os.path.expanduser(
-                f"~/dev/feed-recordings/vaccine-finder/providers/{guid}.json"
-            )
+        address = address.strip(" .-")
 
-            # Attempt to find a file in providers/ that matches the GUID, as it has more data
-            # But if it doesn't, we'll just use what we have, since that has everything except hours/URLs
-            try:
-                fh = open(provider_path)
-                provider = json.load(fh)
-                fh.close()
-            except FileNotFoundError:
-                provider = p
+        address2 = provider.get("address2")
+        if address2 is not None:
+            address2 = address2.strip(" .-")
 
-            name = provider.get("name")
-            if name is None:
-                continue
+        if address2 != "":
+            address = f"{address} {address2}"
 
-            address = provider.get("address1")
-            if address is None:
-                continue
+        city = provider.get("city")
+        if city is None:
+            continue
+        city = city.strip()
 
-            address = address.strip(" .-")
+        zip_code = provider.get("zip")
+        if zip_code is None:
+            continue
 
-            address2 = provider.get("address2")
-            if address2 is not None:
-                address2 = address2.strip(" .-")
+        county = None
+        region = zipcodes.matching(zip_code)
+        if len(region) > 0:
+            county = region[0].get("county")
 
-            if address2 != "":
-                address = f"{address} {address2}"
+        zip_code = trim_zip_code(zip_code)
 
-            city = provider.get("city")
-            if city is None:
-                continue
-            city = city.strip()
+        state = provider.get("state")
+        if state is None or state != "CA":
+            continue
 
-            zip_code = provider.get("zip")
-            if zip_code is None:
-                continue
+        address = f"{address}, {city}, CA {zip_code}"
 
-            county = None
-            region = zipcodes.matching(zip_code)
-            if len(region) > 0:
-                county = region[0].get("county")
+        l = Location(
+            name=name,
+            address=address,
+            zip=zip_code,
+            phone=provider.get("phone"),
+            lat=provider.get("lat"),
+            long=provider.get("long"),
+            county=county,
+            # Fields from the higher fidelity data
+            url=provider.get("website"),
+            reservation_url=provider.get("prescreening_site"),
+            hours=format_hours(provider),
+        )
 
-            zip_code = trim_zip_code(zip_code)
-
-            state = provider.get("state")
-            if state is None or state != "CA":
-                continue
-
-            address = f"{address}, {city}, CA {zip_code}"
-
-            l = Location(
-                name=name,
-                address=address,
-                zip=zip_code,
-                phone=provider.get("phone"),
-                lat=provider.get("lat"),
-                long=provider.get("long"),
-                county=county,
-                # Fields from the higher fidelity data
-                url=provider.get("website"),
-                reservation_url=provider.get("prescreening_site"),
-                hours=format_hours(provider),
-            )
-
-            if l not in locations:
-                locations.append(l)
+        if l not in locations:
+            locations.append(l)
 
     # Can't validate at the moment since we don't have counties from our scrapes
     # validate(locations)
