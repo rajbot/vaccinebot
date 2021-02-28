@@ -23,6 +23,9 @@ parser.add_argument(
     "--add-records", action="store_true", help="Add new locations found to Airtable"
 )
 parser.add_argument(
+    "--update-external-ids", action="store_true", help="Add new external identifiers to Airtable"
+)
+parser.add_argument(
     "--print-tsv", action="store_true", help="Print results in TSV format"
 )
 parser.add_argument(
