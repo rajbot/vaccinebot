@@ -301,7 +301,8 @@ def print_fuzzy_matches(location, table):
 def print_fuzzy_tsv(location, table, match_id):
     name = location.name.replace("\t", " ").replace("\n", " ")
     address = location.address.replace("\t", " ").replace("\n", ", ")
-    org_name = location.org_name.replace("\t", " ").replace("\n", " ")
+    org_name = location.org_name or ""
+    org_name = org_name.replace("\t", " ").replace("\n", " ")
     zip = location.zip
     county = location.county
     url = location.url
@@ -324,8 +325,8 @@ def print_fuzzy_tsv(location, table, match_id):
             if editdistance.eval(address, db_address) < max_distance:
                 num1 = address.split()[0]
                 num2 = db_address.split()[0]
-                num1 = int(re.sub("[^0-9]", "", num1))
                 try:
+                    num1 = int(re.sub("[^0-9]", "", num1))
                     num2 = int(re.sub("[^0-9]", "", num2))
                 except ValueError:
                     continue
