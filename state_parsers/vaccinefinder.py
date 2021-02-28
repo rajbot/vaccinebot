@@ -100,6 +100,7 @@ def run():
             url=provider.get("website"),
             reservation_url=provider.get("prescreening_site"),
             hours=format_hours(provider),
+            id = provider["guid"]
         )
 
         if l not in locations:

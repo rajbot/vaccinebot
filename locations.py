@@ -231,16 +231,17 @@ def address_line1_min(a):
 def in_db(location, db):
     """Return True if location is already in airtable"""
 
-    # loc_address = address_line1(canonicalize(location.address))
-    loc_address = address_line1_min(canonicalize(location.address))
+    loc_address = canonicalize(location.address)
+    #loc_address = address_line1(canonicalize(location.address))
+    #loc_address = address_line1_min(canonicalize(location.address))
 
     for db_loc in db["content"]:
         # match on canonicalized address field
         db_address = db_loc["address_line1"]
         if db_address == loc_address:
-            return True, db_loc["id"]
+            return True, db_loc["id"], db_loc
 
-    return False, None
+    return False, None, None
 
 
 # cannonicalize_db()
@@ -248,8 +249,9 @@ def in_db(location, db):
 def cannonicalize_db(db):
     for db_loc in db["content"]:
         db_address = db_loc.get("Address", "")
-        # a = address_line1(canonicalize(db_address))
-        a = address_line1_min(canonicalize(db_address))
+        a = canonicalize(db_address)
+        #a = address_line1(canonicalize(db_address))
+        #a = address_line1_min(canonicalize(db_address))
         db_loc["address_line1"] = a
 
 
@@ -339,6 +341,22 @@ def print_fuzzy_tsv(location, table, match_id):
     print("\t".join(cols))
 
 
+# print_match_tsv()
+# ________________________________________________________________________________________
+def print_match_tsv(location, match_row, found):
+    if not found:
+        return
+    name = location.name.replace("\t", " ").replace("\n", " ")
+    address = location.address.replace("\t", " ").replace("\n", ", ")
+    id = location.id
+
+    match_name = match_row["Name"]
+    match_address = match_row["Address"]
+    match_id = match_row["id"]
+
+    print(f'"{name}", {address}, "{match_name}", {match_address}')
+
+
 # airtable_insert()
 # _________________________________________________________________________________________
 def airtable_insert(location):
@@ -367,19 +385,44 @@ def airtable_insert(location):
     )
 
 
+# airtable_update_id()
+# _________________________________________________________________________________________
+def airtable_update_id(location, match_id, place_name):
+    if match_id is None:
+        raise Exception("Match id is None!")
+
+    if location.id is None:
+        raise Exception("location.id is None!")
+
+    if place_name == "Vaccine Finder":
+        id_field = "vaccinefinder_location_id"
+    else:
+        raise Exception("Do not know how to update external id for " + place_name)
+
+    logging.info(f"Updating {id_field} for {location.name}")
+    airtable = Airtable(base_id, "Locations", api_key)
+    record = airtable.match('Location ID', match_id)
+
+    fields = {id_field: location.id}
+    airtable.update(record['id'], fields)
+
+
 # find_matches()
 # _________________________________________________________________________________________
 def find_matches(locs, db, args, place_name):
     # check to see if these locations are already in the database
     num_found = 0
     for location in locs:
-        found, match_id = in_db(location, db)
+        found, match_id, match_row = in_db(location, db)
 
         if found:
             num_found += 1
 
         if args.print_tsv:
             print_fuzzy_tsv(location, db["content"], match_id)
+        elif args.update_external_ids:
+            if found:
+                airtable_update_id(location, match_id, place_name)
         elif not found:
             if args.add_records:
                 print_fuzzy_matches(location, db["content"])

@@ -20,8 +20,9 @@ Location = namedtuple(
         "long",
         "zip",
         "org_name",
+        "id",
     ],
-    defaults=[None] * 11,
+    defaults=[None] * 12,
 )
 
 
