@@ -63,13 +63,13 @@ if args.webhook_notify:
         sys.exit("Must set WEBHOOK_NOTIFY_URL env var")
 
 
-logging.info("Downloading known locations")
+logging.info("Downloading known locations from vaccinateca")
 with urllib.request.urlopen(
     "https://api.vaccinateca.com/v1/locations.json"
 ) as response:
     db = json.load(response)
 
-logging.info(f'loaded {len(db["content"])} locations')
+logging.info(f'loaded {len(db["content"])} locations from vaccinateca')
 
 # add canonicalized address to db dict
 locations.cannonicalize_db(db)
@@ -79,7 +79,7 @@ if state_parser is not None:
     m = importlib.import_module(f".{state_parser}", "state_parsers")
     place_name = f"{m.parser.name}"
     locs = m.run()
-    logging.info(f"\tParsed {len(locs)} locations")
+    logging.info(f"\tParsed {len(locs)} locations from {state_parser}")
     locations.find_matches(locs, db, args, place_name)
     sys.exit(0)
 
