@@ -301,6 +301,8 @@ def print_fuzzy_matches(location, table):
 # print_fuzzy_tsv()
 # ________________________________________________________________________________________
 def print_fuzzy_tsv(location, table, match_id):
+    # Extract fields of interest.  Remove tabs and newlines that will make a
+    # tsv very unhappy.
     name = location.name.replace("\t", " ").replace("\n", " ")
     address = location.address.replace("\t", " ").replace("\n", ", ")
     org_name = location.org_name or ""
@@ -311,17 +313,13 @@ def print_fuzzy_tsv(location, table, match_id):
     if url is None:
         url = ""
 
-    cols = [url, org_name, name, address, zip, county]
-    if match_id is None:
-        cols.append("")
-    else:
-        cols.append(match_id)
-
+    fuzzy_match_ids = ""
     if match_id is None:
         fuzzy_matches = get_fuzzy_matches(location, table)
         if len(fuzzy_matches) > 0:
-            fuzzy_match_ids = [m["id"] for m in fuzzy_matches]
-            cols.append(", ".join(fuzzy_match_ids))
+            fuzzy_match_ids = ",".join([m["id"] for m in fuzzy_matches])
+
+    cols = [url, org_name, name, address, zip, county, match_id or "", fuzzy_match_ids]
 
     print("\t".join(cols))
 
