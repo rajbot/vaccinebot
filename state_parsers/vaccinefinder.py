@@ -41,7 +41,12 @@ def format_hours(provider):
 
 
 def run():
-    path = os.path.expanduser("~/dev/raw-feed-data/vaccine-finder/providers/*.json")
+    raw_feed_data = (
+        os.getenv("RAW_FEED_DATA")
+        or os.path.expanduser("~/dev/raw-feed-data"))
+    if not os.path.exists(raw_feed_data):
+        raise FileNotFoundError(raw_feed_data)
+    path = os.path.join(raw_feed_data, "vaccine-finder/providers/*.json")
 
     locations = []
     for provider_path in glob.iglob(path):
