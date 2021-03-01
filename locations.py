@@ -267,8 +267,8 @@ def get_fuzzy_matches(location, table):
         if editdistance.eval(address, db_address) < max_distance:
             num1 = address.split()[0]
             num2 = db_address.split()[0]
-            num1 = int(re.sub("[^0-9]", "", num1))
             try:
+                num1 = int(re.sub("[^0-9]", "", num1))
                 num2 = int(re.sub("[^0-9]", "", num2))
             except ValueError:
                 continue
@@ -317,25 +317,10 @@ def print_fuzzy_tsv(location, table, match_id):
     else:
         cols.append(match_id)
 
-    fuzzy_match_ids = []
     if match_id is None:
-        for db_loc in table:
-            address = location.address.lower()
-            db_address = db_loc.get("Address", "").lower()
-            if db_address == "":
-                continue
-            if editdistance.eval(address, db_address) < max_distance:
-                num1 = address.split()[0]
-                num2 = db_address.split()[0]
-                try:
-                    num1 = int(re.sub("[^0-9]", "", num1))
-                    num2 = int(re.sub("[^0-9]", "", num2))
-                except ValueError:
-                    continue
-                if abs(num1 - num2) < max_address_difference:
-                    # cols.append(f"{db_loc['Name']}, {db_loc['Address']}")
-                    fuzzy_match_ids.append(db_loc["id"])
-        if len(fuzzy_match_ids) > 0:
+        fuzzy_matches = get_fuzzy_matches(location, table)
+        if len(fuzzy_matches) > 0:
+            fuzzy_match_ids = [m["id"] for m in fuzzy_matches]
             cols.append(", ".join(fuzzy_match_ids))
 
     print("\t".join(cols))
