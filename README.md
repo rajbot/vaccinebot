@@ -1,7 +1,8 @@
 # Usage
 
 ```
-usage: crawler.py [-h] [-v] [-c COUNTY] [-s STATE_PARSER] [--add-records] [--print-tsv] [--webhook-notify]
+usage: crawler.py [-h] [-v] [-c COUNTY] [-s STATE_PARSER] [--add-records] [--update-external-ids]
+                  [--print-tsv] [--webhook-notify] [--address-match {strict,fuzzy}]
 
 VaccinateCA crawler.
 
@@ -13,8 +14,12 @@ optional arguments:
   -s STATE_PARSER, --state-parser STATE_PARSER
                         Run a state-wide parser
   --add-records         Add new locations found to Airtable
+  --update-external-ids
+                        Add new external identifiers to Airtable
   --print-tsv           Print results in TSV format
   --webhook-notify      Notify via webhook if new locations are found
+  --address-match {strict,fuzzy}
+                        Address match algorithm
 ```
 
 
