@@ -3,6 +3,7 @@
 # Run manually: python3 -m state_parsers.vaccinefinder
 
 import glob
+import logging
 import os
 import json
 import re
@@ -51,7 +52,11 @@ def run():
     locations = []
     for provider_path in glob.iglob(path):
         fh = open(provider_path)
-        provider = json.load(fh)
+        try:
+            provider = json.load(fh)
+        except json.decoder.JSONDecodeError:
+            logging.error("Could not parse " + provider_path)
+            continue
         fh.close()
 
         name = provider.get("name")

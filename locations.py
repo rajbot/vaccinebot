@@ -228,12 +228,16 @@ def address_line1_min(a):
 
 # in_db()
 # ________________________________________________________________________________________
-def in_db(location, db):
+def in_db(location, db, address_match):
     """Return True if location is already in airtable"""
 
-    loc_address = canonicalize(location.address)
-    #loc_address = address_line1(canonicalize(location.address))
-    #loc_address = address_line1_min(canonicalize(location.address))
+    if address_match == "strict":
+        loc_address = canonicalize(location.address)
+    elif address_match == "fuzzy":
+        # loc_address = address_line1(canonicalize(location.address))
+        loc_address = address_line1_min(canonicalize(location.address))
+    else:
+        raise Exception("Invalid address_match option")
 
     for db_loc in db["content"]:
         # match on canonicalized address field
@@ -246,12 +250,17 @@ def in_db(location, db):
 
 # cannonicalize_db()
 # ________________________________________________________________________________________
-def cannonicalize_db(db):
+def cannonicalize_db(db, address_match):
     for db_loc in db["content"]:
         db_address = db_loc.get("Address", "")
-        a = canonicalize(db_address)
-        #a = address_line1(canonicalize(db_address))
-        #a = address_line1_min(canonicalize(db_address))
+        if address_match == "strict":
+            a = canonicalize(db_address)
+        elif address_match == "fuzzy":
+            # a = address_line1(canonicalize(db_address))
+            a = address_line1_min(canonicalize(db_address))
+        else:
+            raise Exception("Invalid address_match option")
+
         db_loc["address_line1"] = a
 
 
@@ -384,19 +393,19 @@ def airtable_update_id(location, match_id, place_name):
 
     logging.info(f"Updating {id_field} for {location.name}")
     airtable = Airtable(base_id, "Locations", api_key)
-    record = airtable.match('Location ID', match_id)
+    record = airtable.match("Location ID", match_id)
 
     fields = {id_field: location.id}
-    airtable.update(record['id'], fields)
+    airtable.update(record["id"], fields)
 
 
 # find_matches()
 # _________________________________________________________________________________________
-def find_matches(locs, db, args, place_name):
+def find_matches(locs, db, args, place_name, address_match):
     # check to see if these locations are already in the database
     num_found = 0
     for location in locs:
-        found, match_id, match_row = in_db(location, db)
+        found, match_id, match_row = in_db(location, db, address_match)
 
         if found:
             num_found += 1

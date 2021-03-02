@@ -23,7 +23,9 @@ parser.add_argument(
     "--add-records", action="store_true", help="Add new locations found to Airtable"
 )
 parser.add_argument(
-    "--update-external-ids", action="store_true", help="Add new external identifiers to Airtable"
+    "--update-external-ids",
+    action="store_true",
+    help="Add new external identifiers to Airtable",
 )
 parser.add_argument(
     "--print-tsv", action="store_true", help="Print results in TSV format"
@@ -33,6 +35,13 @@ parser.add_argument(
     action="store_true",
     help="Notify via webhook if new locations are found",
 )
+parser.add_argument(
+    "--address-match",
+    default="fuzzy",
+    choices=["strict", "fuzzy"],
+    help="Address match algorithm",
+)
+
 args = parser.parse_args()
 
 level = logging.INFO
@@ -71,8 +80,12 @@ with urllib.request.urlopen(
 
 logging.info(f'loaded {len(db["content"])} locations from vaccinateca')
 
+# Ensure Vaccine Finder matching is always in strict mode
+if state_parser == "vaccinefinder":
+    args.address_match = "strict"
+
 # add canonicalized address to db dict
-locations.cannonicalize_db(db)
+locations.cannonicalize_db(db, args.address_match)
 
 
 if state_parser is not None:
@@ -80,7 +93,7 @@ if state_parser is not None:
     place_name = f"{m.parser.name}"
     locs = m.run()
     logging.info(f"\tParsed {len(locs)} locations from {state_parser}")
-    locations.find_matches(locs, db, args, place_name)
+    locations.find_matches(locs, db, args, place_name, args.address_match)
     sys.exit(0)
 
 
@@ -102,6 +115,14 @@ for modinfo in pkgutil.iter_modules(location_parsers.__path__):
             webhook.notify_broken(place_name)
         continue
 
+    if len(locs) == 0:
+        logging.error(
+            f"\tParser for {place_name} returned zero results! Please fix this parser"
+        )
+        if args.webhook_notify:
+            webhook.notify_broken(place_name)
+        continue
+
     logging.info(f"\tParsed {len(locs)} locations")
 
-    locations.find_matches(locs, db, args, place_name)
+    locations.find_matches(locs, db, args, place_name, args.address_match)

@@ -25,6 +25,8 @@ def address_fixup(address):
         address = "15970 Los Serranos City Club Dr, Chino Hills, CA 91709"
     elif address == "12202 1st St., Yucaipa":
         address = "12202 1st St., Yucaipa, CA 92399"
+    elif address == "660 Colton Ave, Colton, CA 923246":
+        address = "660 Colton Ave, Colton, CA 92324"
 
     # If the address doesn't have "," between the City and CA, add the comma
     address = add_comma(address)
