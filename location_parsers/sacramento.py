@@ -20,6 +20,7 @@ county = County(
 
 
 def address_fixup(a):
+    a = a.replace('3680 Crocker Ave, Sacramento, CA, 95818', '3680 Crocker Dr, Sacramento, CA 95818')
     return a
 
 
@@ -53,13 +54,14 @@ def run():
     for s in site_layer["featureSet"]["features"]:
         site = s["attributes"]
         name = site["Location"]
-        #if site["Community_Doses"] == "No":
-        #    continue
+        if site["Community_Doses"] == "No":
+            continue
 
         address = site["Address"]
         if site.get("Address2"):
             address += f", {site['Address2']}"
         address += f", {site['City']}, {site['State']}, {site['Zip']}"
+        address = address_fixup(address)
 
         l = Location(
             name = name,
