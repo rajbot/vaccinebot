@@ -215,14 +215,18 @@ def address_line1_min(a):
     """Return only a minimal version of an address
 
     >>> address_line1_min('1001 Potrero Ave GR-1, San Francisco, CA 94110')
-    '1001 potrero san francisco, ca 94110'
+    '1001 potrero san francisco ca 94110'
 
     """
     line1 = address_line1(canonicalize(a))
     m = re.match(".*?(\d+\s+\w+?)\s.*?((?:san |santa |los )\w+, ca \d{5})", line1)
 
     if m is not None:
-        return f"{m.group(1)} {m.group(2)}"
+        line1 = f"{m.group(1)} {m.group(2)}"
+
+    line1 = line1.replace(', ', ' ')
+    line1 = line1.replace('. ', ' ')
+
     return line1
 
 
@@ -233,7 +237,7 @@ def in_db(location, db, address_match):
 
     if address_match == "strict":
         loc_address = canonicalize(location.address)
-    elif address_match == "fuzzy":
+    elif address_match == "close":
         # loc_address = address_line1(canonicalize(location.address))
         loc_address = address_line1_min(canonicalize(location.address))
     else:
@@ -255,7 +259,7 @@ def cannonicalize_db(db, address_match):
         db_address = db_loc.get("Address", "")
         if address_match == "strict":
             a = canonicalize(db_address)
-        elif address_match == "fuzzy":
+        elif address_match == "close":
             # a = address_line1(canonicalize(db_address))
             a = address_line1_min(canonicalize(db_address))
         else:
@@ -426,8 +430,13 @@ def find_matches(locs, db, args, place_name, address_match):
                     f"\t{location.name}, {location.address} was not found in database! Please add it manually."
                 )
 
+                fuzzy_matches = get_fuzzy_matches(location, db["content"])
+                if len(fuzzy_matches) > 0:
+                    logging.warning("\t  Possible matches for new location:")
+                    for i, m in enumerate(fuzzy_matches):
+                        logging.warning(f"\t  #{i+1:<5} {m['Name']}, {m['Address']}")
+
                 if args.webhook_notify:
-                    fuzzy_matches = get_fuzzy_matches(location, db["content"])
                     webhook.notify(
                         place_name, location.name, location.address, fuzzy_matches
                     )

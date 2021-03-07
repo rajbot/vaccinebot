@@ -37,8 +37,8 @@ parser.add_argument(
 )
 parser.add_argument(
     "--address-match",
-    default="fuzzy",
-    choices=["strict", "fuzzy"],
+    default="close",
+    choices=["strict", "close"],
     help="Address match algorithm",
 )
 
