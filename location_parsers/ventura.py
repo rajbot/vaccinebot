@@ -50,7 +50,7 @@ def run():
 
             # m dash
             strings = info.split("–")
-            print(strings)
+            
             if len(strings) < 2:
                 continue
 
