@@ -16,12 +16,13 @@ county = County(
     url="https://www.venturacountyrecovers.org/vaccine-information/portal/",
 )
 
+
 def address_fixup(address):
     if address == "Vons 2825 1291 S Victoria Ave, Oxnard, 93035":
         return "Vons 2825 – 1291 S Victoria Ave, Oxnard, CA 93035"
     elif address == "Vons 1913 – 450 S Ventura Rd, Oxnard, CA 93030-6557":
         return "Vons 1913 – 450 S Ventura Rd, Oxnard, CA 93030"
-    
+
     return address
 
 
@@ -39,7 +40,7 @@ def run():
         sites = table.find_all("a", href=True)
 
         for site in sites:
-            url = site['href']
+            url = site["href"]
 
             contents = site.contents
             if len(contents) < 1:
@@ -50,7 +51,7 @@ def run():
 
             # m dash
             strings = info.split("–")
-            
+
             if len(strings) < 2:
                 continue
 
