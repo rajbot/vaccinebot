@@ -232,7 +232,7 @@ def address_line1_min(a):
 
 # in_db()
 # ________________________________________________________________________________________
-def in_db(location, db, address_match):
+def in_db(location, db, address_match, external_id_field):
     """Return True if location is already in airtable"""
 
     if address_match == "strict":
@@ -244,6 +244,10 @@ def in_db(location, db, address_match):
         raise Exception("Invalid address_match option")
 
     for db_loc in db["content"]:
+        if external_id_field is not None and location.id is not None:
+            if db_loc.get(external_id_field) == location.id:
+                return True, db_loc["id"], db_loc
+
         # match on canonicalized address field
         db_address = db_loc["address_line1"]
         if db_address == loc_address:
@@ -297,6 +301,7 @@ def print_fuzzy_matches(location, table):
     print("New location found:")
     print(f"\t{location.name}")
     print(f"\t{location.address}")
+    print(f"\t{location.phone}, {location.id}")
     print("-" * 80)
 
     matches = get_fuzzy_matches(location, table)
@@ -309,6 +314,8 @@ def print_fuzzy_matches(location, table):
             print()
     else:
         print("No existing locations found for this location")
+
+    return matches
 
 
 # print_fuzzy_tsv()
@@ -323,16 +330,21 @@ def print_fuzzy_tsv(location, table, match_id):
     zip = location.zip
     county = location.county
     url = location.url
+    phone = location.phone
+    id = location.id or ""
     if url is None:
         url = ""
 
     fuzzy_match_ids = ""
+    fuzzy_match_addresses = ""
     if match_id is None:
         fuzzy_matches = get_fuzzy_matches(location, table)
         if len(fuzzy_matches) > 0:
             fuzzy_match_ids = ",".join([m["id"] for m in fuzzy_matches])
+            fuzzy_match_addresses = "\t".join([f"{m['Name'], m['Address'], m.get('Phone number', '')}" for m in fuzzy_matches])
 
     cols = [url, org_name, name, address, zip, county, match_id or "", fuzzy_match_ids]
+    #cols = [url, id, name, address, zip, phone, match_id or "", fuzzy_match_addresses]
 
     print("\t".join(cols))
 
@@ -354,8 +366,8 @@ def print_match_tsv(location, match_row, found):
 
 
 # airtable_insert()
-# _________________________________________________________________________________________
-def airtable_insert(location):
+# ________________________________________________________________________________________
+def airtable_insert(location, external_id):
     lat = location.lat
     long = location.long
     if lat is None or long is None:
@@ -367,22 +379,29 @@ def airtable_insert(location):
     if location.reservation_url is not None:
         url = location.reservation_url
 
-    airtable.insert(
-        {
-            "Name": location.name,
-            "Address": location.address,
-            "Website": location.url,
-            "Phone number": location.phone,
-            "Hours": location.hours,
-            "County": f"{location.county} County",
-            "Latitude": lat,
-            "Longitude": long,
-        }
-    )
+    county = location.county
+    if not county.endswith(" County") and county != "San Francisco":
+        county += " County"
+
+    fields = {
+        "Name": location.name,
+        "Address": location.address,
+        "Website": location.url,
+        "Phone number": location.phone,
+        "Hours": location.hours,
+        "County": county,
+        "Latitude": lat,
+        "Longitude": long,
+    }
+
+    if external_id is not None:
+        fields[external_id] = location.id
+
+    airtable.insert(fields)
 
 
 # airtable_update_id()
-# _________________________________________________________________________________________
+# ________________________________________________________________________________________
 def airtable_update_id(location, match_id, place_name):
     if match_id is None:
         raise Exception("Match id is None!")
@@ -404,18 +423,24 @@ def airtable_update_id(location, match_id, place_name):
 
 
 # find_matches()
-# _________________________________________________________________________________________
+# ________________________________________________________________________________________
 def find_matches(locs, db, args, place_name, address_match):
     # check to see if these locations are already in the database
+
+    external_id = None
+    if place_name == "Vaccine Finder":
+        external_id = "vaccinefinder_location_id"
+
     num_found = 0
     for location in locs:
-        found, match_id, match_row = in_db(location, db, address_match)
+        found, match_id, match_row = in_db(location, db, address_match, external_id)
 
         if found:
             num_found += 1
 
         if args.print_tsv:
-            print_fuzzy_tsv(location, db["content"], match_id)
+            if not found:
+                print_fuzzy_tsv(location, db["content"], match_id)
         elif args.update_external_ids:
             if found:
                 airtable_update_id(location, match_id, place_name)
@@ -424,17 +449,32 @@ def find_matches(locs, db, args, place_name, address_match):
                 print_fuzzy_matches(location, db["content"])
                 response = input("Add this record to Airtable? (y/n):")
                 if response == "y":
-                    airtable_insert(location)
+                    airtable_insert(location, external_id)
+            elif args.update_external_ids_fuzzy:
+                matches = print_fuzzy_matches(location, db["content"])
+                if len(matches) > 0:
+                    response = input(f"Add {external_id}? (Enter N to skip, or 1-9 to update: ")
+                    if re.match(r'\d+', response):
+                        update_num = int(response)
+                        if update_num <1 or update_num > len(matches):
+                            raise Exception("Invalid record number")
+                        match_id = matches[update_num-1]['id']
+                        airtable_update_id(location, match_id, place_name)
             else:
                 logging.warning(
                     f"\t{location.name}, {location.address} was not found in database! Please add it manually."
                 )
+                if external_id is not None:
+                    logging.warning(
+                        f"\t  {external_id}: {location.id}"
+                    )
 
                 fuzzy_matches = get_fuzzy_matches(location, db["content"])
                 if len(fuzzy_matches) > 0:
                     logging.warning("\t  Possible matches for new location:")
                     for i, m in enumerate(fuzzy_matches):
                         logging.warning(f"\t  #{i+1:<5} {m['Name']}, {m['Address']}")
+                    logging.warning("")
 
                 if args.webhook_notify:
                     webhook.notify(
