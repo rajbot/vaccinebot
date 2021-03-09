@@ -22,6 +22,8 @@ def address_fixup(address):
         return "Vons 2825 – 1291 S Victoria Ave, Oxnard, CA 93035"
     elif address == "Vons 1913 – 450 S Ventura Rd, Oxnard, CA 93030-6557":
         return "Vons 1913 – 450 S Ventura Rd, Oxnard, CA 93030"
+    elif address == "Albertsons Savon – 541 S Reino Rd, Newbury Park, CA":
+        return "Albertsons Savon – 541 S Reino Rd, Newbury Park, CA 91320"
 
     return address
 
