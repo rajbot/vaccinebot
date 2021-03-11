@@ -28,6 +28,11 @@ parser.add_argument(
     help="Add new external identifiers to Airtable",
 )
 parser.add_argument(
+    "--update-external-ids-fuzzy",
+    action="store_true",
+    help="Add new external identifiers to Airtable for fuzzy matches, with manual confirmation",
+)
+parser.add_argument(
     "--print-tsv", action="store_true", help="Print results in TSV format"
 )
 parser.add_argument(
