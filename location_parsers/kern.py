@@ -25,27 +25,15 @@ county = County(
 def address_fixup(a):
     """ Some Kern Co. addresses have typos. """
 
-    a = a.replace(
-        "2901 Silent Ave Suite 201, Bakersfield, CA 93308",
-        "2901 Sillect Ave Suite 201, Bakersfield, CA 93308",
-    )
+    d = {
+        "2901 Silent Ave Suite 201, Bakersfield, CA 93308": "2901 Sillect Ave Suite 201, Bakersfield, CA 93308",
+        "3300 BUENA VISTA RD A, Bakersfield, CA 93311": "3300 Buena Vista Rd Bldg A, Bakersfield, CA 93311",
+        "8000 WHITE LANE, Bakersfield, CA 93301": "8000 WHITE LANE, BAKERSFIELD, CA 93309",
+        "Rite Aid Store 06303, Bakersfield, CA 93313": "3225 PANAMA LANE, BAKERSFIELD, CA 93313",
+        "3500 Stine Rd Bakersfield, Bakersfield, CA 93309": "3500 Stine Rd, Bakersfield, CA 93309",
+    }
 
-    a = a.replace(
-        "3300 BUENA VISTA RD A, Bakersfield, CA 93311",
-        "3300 Buena Vista Rd Bldg A, Bakersfield, CA 93311",
-    )
-
-    a = a.replace(
-        "8000 WHITE LANE, Bakersfield, CA 93301",
-        "8000 WHITE LANE, BAKERSFIELD, CA 93309",
-    )
-
-    a = a.replace(
-        "Rite Aid Store 06303, Bakersfield, CA 93313",
-        "3225 PANAMA LANE, BAKERSFIELD, CA 93313",
-    )
-
-    return a
+    return d.get(a, a)
 
 
 # Returns a list of Location objects

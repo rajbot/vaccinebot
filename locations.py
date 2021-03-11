@@ -122,6 +122,7 @@ def canonicalize(a):
     a = re.sub(r" blvd\.?(\W)", r" boulevard\1", a)
     a = re.sub(r" ctr\.?(\W)", r" center\1", a)
     a = re.sub(r" ests\.?(\W)", r" estates\1", a)
+    a = re.sub(r" ln\.?(\W)", r" lane\1", a)
     a = re.sub(r" rd\.?(\W)", r" road\1", a)
     a = re.sub(r" pkwy\.?(\W)", r" parkway\1", a)
     a = re.sub(r" rte\.?(\W)", r" route\1", a)
