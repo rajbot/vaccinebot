@@ -69,6 +69,18 @@ def name_fixup(id, name):
     return name
 
 
+def address_fixup(id, a):
+
+    d = {
+        "84bb398b-965a-4fea-a51b-41746c7a64c2": "861 North Vine Street, Hollywood, CA 90038",
+        "d0db520-f047-4b23-a002-a515274988a8": "2101 W. Imperial Highway #c, La Habra, CA 90631",
+        "9d3474f8-fbcc-4163-b442-45123673f07e": "9725 Laurel Canyon Blvd, Arleta CA, 91331",
+        "720a49a3-1c20-480a-ba23-d8121daf0ea1": "345 Town Center West Santa Maria, CA 93458",
+    }
+
+    return d.get(id, a)
+
+
 def run():
     raw_feed_data = (
         os.getenv("RAW_FEED_DATA")
@@ -90,8 +102,9 @@ def run():
         if provider["guid"] in duplicates:
             continue
 
+        guid = provider["guid"]
         name = provider.get("name")
-        name = name_fixup(provider["guid"], name)
+        name = name_fixup(guid, name)
         if name is None:
             continue
 
@@ -130,6 +143,7 @@ def run():
             continue
 
         address = f"{address}, {city}, CA {zip_code}"
+        address = address_fixup(guid, address)
 
         l = Location(
             name=name,

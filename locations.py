@@ -122,6 +122,8 @@ def canonicalize(a):
     a = re.sub(r" blvd\.?(\W)", r" boulevard\1", a)
     a = re.sub(r" ctr\.?(\W)", r" center\1", a)
     a = re.sub(r" ests\.?(\W)", r" estates\1", a)
+    a = re.sub(r" expy\.?(\W)", r" expressway\1", a)
+    a = re.sub(r" hwy\.?(\W)", r" highway\1", a)
     a = re.sub(r" ln\.?(\W)", r" lane\1", a)
     a = re.sub(r" rd\.?(\W)", r" road\1", a)
     a = re.sub(r" pkwy\.?(\W)", r" parkway\1", a)
@@ -270,6 +272,10 @@ def cannonicalize_db(db, address_match):
         else:
             raise Exception("Invalid address_match option")
 
+        if db_loc.get("Affiliation") == "CVS":
+            # fix misplaced comma
+            a = re.sub(r'([a-z]) ca, (\d{5})', r'\1, ca \2', a)
+
         db_loc["address_line1"] = a
 
 
@@ -344,8 +350,8 @@ def print_fuzzy_tsv(location, table, match_id):
             fuzzy_match_ids = ",".join([m["id"] for m in fuzzy_matches])
             fuzzy_match_addresses = "\t".join([f"{m['Name'], m['Address'], m.get('Phone number', '')}" for m in fuzzy_matches])
 
-    cols = [url, org_name, name, address, zip, county, match_id or "", fuzzy_match_ids]
-    #cols = [url, id, name, address, zip, phone, match_id or "", fuzzy_match_addresses]
+    #cols = [url, org_name, name, address, zip, county, match_id or "", fuzzy_match_ids]
+    cols = [url, id, name, address, zip, phone, match_id or "", fuzzy_match_addresses]
 
     print("\t".join(cols))
 
@@ -403,7 +409,7 @@ def airtable_insert(location, external_id):
 
 # airtable_update_id()
 # ________________________________________________________________________________________
-def airtable_update_id(location, match_id, place_name):
+def airtable_update_id(location, match_id, match_row, place_name):
     if match_id is None:
         raise Exception("Match id is None!")
 
@@ -414,6 +420,11 @@ def airtable_update_id(location, match_id, place_name):
         id_field = "vaccinefinder_location_id"
     else:
         raise Exception("Do not know how to update external id for " + place_name)
+
+    if match_row is not None:
+        if match_row.get(id_field) == location.id:
+            logging.info(f"{location.name} already has {id_field} set!")
+            return
 
     logging.info(f"Updating {id_field} for {location.name}")
     airtable = Airtable(base_id, "Locations", api_key)
@@ -444,7 +455,7 @@ def find_matches(locs, db, args, place_name, address_match):
                 print_fuzzy_tsv(location, db["content"], match_id)
         elif args.update_external_ids:
             if found:
-                airtable_update_id(location, match_id, place_name)
+                airtable_update_id(location, match_id, match_row, place_name)
         elif not found:
             if args.add_records:
                 print_fuzzy_matches(location, db["content"])
@@ -460,7 +471,7 @@ def find_matches(locs, db, args, place_name, address_match):
                         if update_num <1 or update_num > len(matches):
                             raise Exception("Invalid record number")
                         match_id = matches[update_num-1]['id']
-                        airtable_update_id(location, match_id, place_name)
+                        airtable_update_id(location, match_id, None, place_name)
             else:
                 logging.warning(
                     f"\t{location.name}, {location.address} was not found in database! Please add it manually."
