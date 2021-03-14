@@ -18,21 +18,22 @@ parser = Parser(name="Stanford", url="https://stanfordhealthcare.org/discover/co
 
 
 def address_fixup(a):
-    if re.search(r'\d{5}$', a):
-        return a
 
     d = {
-        "2585 Samaritan Drive, Suite 303, San Jose": "95124",
-        "5565 W. Las Positas Blvd, Suite 150, Pleasanton": "94588",
-        "6121 Hollis St, Emeryville": "94608",
-        "341 Galvez Street, Stanford": "94305",
-        "505 Broadway, Redwood City": "94063",
-        "350 E Tasman Dr, San Jose": "95134",
+        "2585 Samaritan Drive, Suite 303, San Jose": ("95124", "Santa Clara"),
+        "5565 W. Las Positas Blvd, Suite 150, Pleasanton": ("94588", "Alameda"),
+        "6121 Hollis St, Emeryville": ("94608", "Alameda"),
+        "341 Galvez Street, Stanford": ("94305", "Santa Clara"),
+        "505 Broadway, Redwood City": ("94063", "San Mateo"),
+        "350 E Tasman Dr, San Jose": ("95134", "Santa Clara"),
+        '4501 Pleasanton Ave, Pleasanton, CA 94566': ("94566", "Alameda"),
+        "2190 Eastridge Loop #1402, San José, CA 95122": ("95122", "Santa Clara"),
     }
-    zip = d[a]
-    a = a + ", CA " + zip
+    zip, county = d[a]
+    if not re.search(r'\d{5}$', a):
+        a = a + ", CA " + zip
 
-    return a
+    return a, county
 
 
 # Returns a list of json objects
@@ -60,12 +61,13 @@ def run():
                 address = parts[1]
                 hours = '\n'.join(parts[2:-1])
 
-        address = address_fixup(address)
+        address, county = address_fixup(address)
         phone = "(650) 498-9000"
 
-        l = Location(name=name, address=address, hours=hours, phone=phone)
+        l = Location(name=name, address=address, hours=hours, phone=phone, county=county)
         locations.append(l)
 
+    validate(locations)
     return locations
 
 

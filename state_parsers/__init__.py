@@ -45,7 +45,7 @@ def validate(locations):
         if not re.search(r", CA 9\d{4}$", l.address):
             raise Exception(f"Couldn't parse zip code: {l.address}")
         if l.county is None or l.county.strip() == "":
-            raise Exception("Could not parse county")
+            raise Exception(f"Could not parse county: {l.address}")
 
 
 def debug_print(locations):
