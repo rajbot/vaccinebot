@@ -69,6 +69,7 @@ def address_fixup(a):
         "1030 W Gardena Blvd, Gardena, CA 90247",
     )
 
+    a = a.replace(", CA, ", ", CA ")
     a = a.replace(",,", ",")
     a = a.replace(". ,", ".,")
 

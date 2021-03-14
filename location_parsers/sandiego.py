@@ -21,13 +21,16 @@ county = County(
 
 def address_fixup(a):
     """ Some San Diego addresses aren't fixed up by the canonicalizer. """
+    a = a.strip()
 
     # A newline in the middle of a city name, that should be turned into a space.
     # canonicalize() will turn it into a comma instead
-    a = a.replace(
-        "2260 Jimmy Durante Blvd, Del\nMar, CA 92014",
-        "2260 Jimmy Durante Blvd, Del Mar, CA 92014",
-    )
+    d = {
+        "2260 Jimmy Durante Blvd, Del\nMar, CA 92014": "2260 Jimmy Durante Blvd, Del Mar, CA 92014",
+        "1388 Buckman Springs Road, Campo CA 91906": "1388 Buckman Springs Road, Campo, CA 91906",
+    }
+
+    a = d.get(a, a)
     return a
 
 
