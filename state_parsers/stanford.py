@@ -36,7 +36,7 @@ def address_fixup(a):
     return a, county
 
 
-# Returns a list of json objects
+# Returns a list of Locations
 def run():
     http = urllib3.PoolManager(headers=header_dict)  # set user-agent
     r = http.request("GET", parser.url)
