@@ -251,12 +251,62 @@ def in_db(location, db, address_match, external_id_field):
             if db_loc.get(external_id_field) == location.id:
                 return True, db_loc["id"], db_loc
 
+        if db_loc["provider_id"] is not None:
+            if db_loc["provider_id"] == location.provider_id:
+                return True, db_loc["id"], db_loc
+
         # match on canonicalized address field
         db_address = db_loc["address_line1"]
         if db_address == loc_address:
             return True, db_loc["id"], db_loc
 
     return False, None, None
+
+
+# generate_provider_id()
+# ________________________________________________________________________________________
+def generate_provider_id(db_loc):
+    """ Generate provider ids for retail pharmacies (riteaid:123) """
+
+    affiliation = db_loc.get("Affiliation")
+    name = db_loc.get("Name")
+    if name is None:
+        return None
+
+    if affiliation == "Rite-Aid":
+        m = re.search(r'RITE AID PHARMACY (\d+)', name, re.I)
+        return f"riteaid:{int(m.group(1))}"
+    elif affiliation == "Walgreens":
+        m = re.search(r'Walgreens (?:Specialty )?(?:Pharmacy )?#(\d+)', name, re.I)
+        if m is None:
+            return None
+        else:
+            return f"walgreens:{int(m.group(1))}"
+    elif affiliation == "Safeway":
+        m = re.search(r'Safeway (?:PHARMACY )?\s?#?(\d+)', name, re.I)
+        if m is None:
+            return None
+        else:
+            return f"safeway:{int(m.group(1))}"
+    elif name.lower().startswith("vons pharmacy"):
+        # Vons locations have no affiliation listed
+        m = re.search(r'VONS PHARMACY #(\d+)', name, re.I)
+        return f"vons:{int(m.group(1))}"
+    elif affiliation == "Sam's Pharmacy":
+        m = re.search(r'SAMS PHARMACY 10-(\d+)', name, re.I)
+        return f"sams:{int(m.group(1))}"
+    elif affiliation == "Sav-on Pharmacy":
+        # These are albertsons locations
+        m = re.search(r'SAV-?ON PHARMACY #\s?(\d+)', name, re.I)
+        return f"albertsons:{int(m.group(1))}"
+    elif affiliation == "Pavilions":
+        m = re.search(r'PAVILIONS PHARMACY #(\d+)', name, re.I)
+        return f"pavilions:{int(m.group(1))}"
+    elif affiliation == "Walmart":
+        m = re.search(r'WALMART PHARMACY 10-(\d+)', name, re.I)
+        return f"walmart:{int(m.group(1))}"
+
+    return None
 
 
 # cannonicalize_db()
@@ -277,6 +327,8 @@ def cannonicalize_db(db, address_match):
             a = re.sub(r'([a-z]) ca, (\d{5})', r'\1, ca \2', a)
 
         db_loc["address_line1"] = a
+
+        db_loc["provider_id"] = generate_provider_id(db_loc)
 
 
 # get_fuzzy_matches()
@@ -369,7 +421,7 @@ def print_match_tsv(location, match_row, found):
     match_address = match_row["Address"]
     match_id = match_row["id"]
 
-    print(f'"{name}", {address}, "{match_name}", {match_address}')
+    print(f'"{name}", {address}, "{match_name}", {match_address}, {match_id}, {id}')
 
 
 # airtable_insert()
@@ -416,8 +468,12 @@ def airtable_update_id(location, match_id, match_row, place_name):
     if location.id is None:
         raise Exception("location.id is None!")
 
+    external_id = location.id
     if place_name == "Vaccine Finder":
         id_field = "vaccinefinder_location_id"
+    elif place_name == "Vaccine Spotter":
+        id_field = "vaccinespotter_location_id"
+        external_id = str(location.id)
     else:
         raise Exception("Do not know how to update external id for " + place_name)
 
@@ -426,11 +482,11 @@ def airtable_update_id(location, match_id, match_row, place_name):
             logging.info(f"{location.name} already has {id_field} set!")
             return
 
-    logging.info(f"Updating {id_field} for {location.name}")
+    logging.info(f"Updating {id_field}={external_id} for {location.name} ({match_id})")
     airtable = Airtable(base_id, "Locations", api_key)
     record = airtable.match("Location ID", match_id)
 
-    fields = {id_field: location.id}
+    fields = {id_field: external_id}
     airtable.update(record["id"], fields)
 
 
@@ -442,6 +498,8 @@ def find_matches(locs, db, args, place_name, address_match):
     external_id = None
     if place_name == "Vaccine Finder":
         external_id = "vaccinefinder_location_id"
+    elif place_name == "Vaccine Spotter":
+        external_id = "vaccinespotter_location_id"
 
     num_found = 0
     for location in locs:
@@ -451,8 +509,9 @@ def find_matches(locs, db, args, place_name, address_match):
             num_found += 1
 
         if args.print_tsv:
-            if not found:
-                print_fuzzy_tsv(location, db["content"], match_id)
+            #if not found:
+            #    print_fuzzy_tsv(location, db["content"], match_id)
+            print_match_tsv(location, match_row, found)
         elif args.update_external_ids:
             if found:
                 airtable_update_id(location, match_id, match_row, place_name)
