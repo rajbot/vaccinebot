@@ -8,6 +8,7 @@ import os
 import json
 import re
 import urllib3
+import zipcodes
 
 from . import Parser, Location
 from . import header_dict, debug_print
@@ -72,6 +73,9 @@ def run():
             name = f"{props['name']} #{store_id}"
             provider_id = None
 
+        zips = zipcodes.matching(zipcode)
+        county = zips[0]["county"]
+
         l = Location(
             id = id,
             name = name,
@@ -80,6 +84,7 @@ def run():
             url = props["url"],
             lat = lat,
             long = long,
+            county = county,
             provider_id = provider_id
         )
         locations.append(l)

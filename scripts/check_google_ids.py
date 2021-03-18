@@ -25,7 +25,8 @@ path = sys.argv[1]
 with open(path) as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        place_id = row['Google Places ID']
+        place_id = row['google_place_id']
         vacca_id = place_ids.get(place_id)
         if vacca_id is not None:
-            print("Match:", place_id, vacca_id, row)
+            print("Match:", place_id, "\n", vacca_id, "\n", row, "\n\n")
+

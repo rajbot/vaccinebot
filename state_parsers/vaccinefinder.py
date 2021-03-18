@@ -44,6 +44,20 @@ duplicates = set([
     "47ba8bbe-a5a1-4e6a-a980-5023c580e4e8", # dupe of eab4b8d4-c345-49be-b68d-fef9b0f85308
     "58670db0-ca74-419a-8785-85d34c63c078", # dupe of 2fdc930e-c63c-42b0-86db-d495830375b2
     "836906a2-011e-4e2b-a734-eeb2a22c1e14", # dupe of 1f75e5f4-5e67-4237-928f-484fd4961e7c
+    "f56e92f8-29b5-45f5-a6e7-3477459ddf43", # dupe of a2c5b40d-d610-4313-8c12-7fd23be39f90
+    "5df170f8-7c55-494b-a0c6-3b82203a125d", # dupe of 0005060d-087f-4529-ab56-d138e0d74686
+    "d9896b38-cf56-4a37-9b94-8723ec420dc5", # dupe of af69fc64-7d4f-4fde-bef2-4a5ae7a285f4
+])
+
+# People or non-public locations
+skips = set([
+    "4d9c9ddb-5b22-4cb7-903c-05f011bb23f1", # Lake County Jail
+    "aae96c22-53e4-4c8c-afd6-58e7c969af15", # Person
+    "ba3c1342-ff9f-4d39-a89a-0dbd8ea6332d", # Person
+    "2640cff4-ebdd-4147-bf31-6e632b5b58bb", # Person
+    "06b55882-185f-4ff6-bcb5-684d169c5c5b", # Person
+    "3e985d94-3e9e-4f3a-b3af-bc13bb45c0ef", # Person
+    "b4b50351-8457-4692-a301-cd1c8c104db7", # Same person as above
 ])
 
 
@@ -84,10 +98,10 @@ def address_fixup(id, a):
 def run():
     raw_feed_data = (
         os.getenv("RAW_FEED_DATA")
-        or os.path.expanduser("~/dev/raw-feed-data"))
+        or os.path.expanduser("~/dev/raw-feed-data/vaccine-finder"))
     if not os.path.exists(raw_feed_data):
         raise FileNotFoundError(raw_feed_data)
-    path = os.path.join(raw_feed_data, "vaccine-finder/CA/providers/*.json")
+    path = os.path.join(raw_feed_data, "CA/providers/*.json")
 
     locations = []
     for provider_path in glob.iglob(path):
@@ -100,6 +114,9 @@ def run():
         fh.close()
 
         if provider["guid"] in duplicates:
+            continue
+
+        if provider["guid"] in skips:
             continue
 
         guid = provider["guid"]

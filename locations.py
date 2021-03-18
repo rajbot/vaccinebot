@@ -237,7 +237,6 @@ def address_line1_min(a):
 # ________________________________________________________________________________________
 def in_db(location, db, address_match, external_id_field):
     """Return True if location is already in airtable"""
-
     if address_match == "strict":
         loc_address = canonicalize(location.address)
     elif address_match == "close":
@@ -248,7 +247,7 @@ def in_db(location, db, address_match, external_id_field):
 
     for db_loc in db["content"]:
         if external_id_field is not None and location.id is not None:
-            if db_loc.get(external_id_field) == location.id:
+            if db_loc.get(external_id_field) == str(location.id):
                 return True, db_loc["id"], db_loc
 
         if db_loc["provider_id"] is not None:
@@ -509,9 +508,9 @@ def find_matches(locs, db, args, place_name, address_match):
             num_found += 1
 
         if args.print_tsv:
-            #if not found:
-            #    print_fuzzy_tsv(location, db["content"], match_id)
-            print_match_tsv(location, match_row, found)
+            if not found:
+                print_fuzzy_tsv(location, db["content"], match_id)
+            #print_match_tsv(location, match_row, found)
         elif args.update_external_ids:
             if found:
                 airtable_update_id(location, match_id, match_row, place_name)
