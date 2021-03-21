@@ -47,6 +47,7 @@ duplicates = set([
     "f56e92f8-29b5-45f5-a6e7-3477459ddf43", # dupe of a2c5b40d-d610-4313-8c12-7fd23be39f90
     "5df170f8-7c55-494b-a0c6-3b82203a125d", # dupe of 0005060d-087f-4529-ab56-d138e0d74686
     "d9896b38-cf56-4a37-9b94-8723ec420dc5", # dupe of af69fc64-7d4f-4fde-bef2-4a5ae7a285f4
+    "971f0373-02a8-43b1-aa11-2e40b29ea8d3", # dupe of 4a3e2ec0-64d3-4fba-902f-0447aea9d148
 ])
 
 # People or non-public locations
@@ -58,6 +59,9 @@ skips = set([
     "06b55882-185f-4ff6-bcb5-684d169c5c5b", # Person
     "3e985d94-3e9e-4f3a-b3af-bc13bb45c0ef", # Person
     "b4b50351-8457-4692-a301-cd1c8c104db7", # Same person as above
+    "9a5f7e91-9323-4bdf-92d4-2b165862c87b", # Mask manufacturer
+    "256805ae-99c5-42ac-8dd7-7113d90262a3", # Person
+    "2074dbd3-47a5-473e-938e-9f3bf16d51ee", # Shopping mall?
 ])
 
 

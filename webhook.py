@@ -3,13 +3,19 @@ import os
 import urllib3
 
 
-def notify(place_name, name, address, fuzzy_matches):
+def notify(place_name, location, fuzzy_matches):
+    name = location.name
+    address = location.address
+
     http = urllib3.PoolManager()
     url = os.environ["WEBHOOK_NOTIFY_URL"]
+    msg = f"New Site Found in {place_name}!"
+    if location.id is not None:
+        msg += f"\nexternal id = {location.id}"
 
     data = {
         "username": "VaccineBot",
-        "content": f"New Site Found in {place_name}!",
+        "content": msg,
         "embeds": [{"title": name, "description": address}],
     }
 

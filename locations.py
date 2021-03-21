@@ -477,9 +477,13 @@ def airtable_update_id(location, match_id, match_row, place_name):
         raise Exception("Do not know how to update external id for " + place_name)
 
     if match_row is not None:
-        if match_row.get(id_field) == location.id:
-            logging.info(f"{location.name} already has {id_field} set!")
+        if match_row.get(id_field) == str(location.id):
+            #logging.info(f"{location.name} already has {id_field} set to {location.id}!")
             return
+        elif match_row.get(id_field) is not None:
+            logging.info(f"{location.name} already has {id_field} set to a different value!")
+            return
+
 
     logging.info(f"Updating {id_field}={external_id} for {location.name} ({match_id})")
     airtable = Airtable(base_id, "Locations", api_key)
@@ -548,7 +552,7 @@ def find_matches(locs, db, args, place_name, address_match):
 
                 if args.webhook_notify:
                     webhook.notify(
-                        place_name, location.name, location.address, fuzzy_matches
+                        place_name, location, fuzzy_matches
                     )
 
     logging.info(f"\t{num_found} locations already in database")
