@@ -11,12 +11,14 @@ EasyProcess==0.3
 editdistance==0.5.3
 future==0.18.2
 geocoder==1.38.1
+googlemaps>=2.22.0
 idna==2.10
 iniconfig==1.1.1
 lxml==4.6.2
 mypy-extensions==0.4.3
 packaging==20.9
 pathspec==0.8.1
+percache==0.4.4
 pluggy==0.13.1
 py==1.10.0
 pyparsing==2.4.7
