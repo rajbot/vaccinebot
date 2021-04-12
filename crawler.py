@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import locations
+import schema
 import argparse
 import importlib
 import json
@@ -45,6 +46,13 @@ parser.add_argument(
     default="close",
     choices=["strict", "close"],
     help="Address match algorithm",
+)
+
+# if --ndjson is provided, also export the results to data/ as ndjson
+parser.add_argument(
+    "--ndjson",
+    action="store_true",
+    help="Export to ndjson",
 )
 
 args = parser.parse_args()
@@ -103,6 +111,9 @@ if state_parser is not None:
     place_name = f"{m.parser.name}"
     locs = m.run()
     logging.info(f"\tParsed {len(locs)} locations from {state_parser}")
+    if args.ndjson:
+        schema.output_ndjson(locs, state_parser)
+
     locations.find_matches(locs, db, args, place_name, args.address_match)
     sys.exit(0)
 
@@ -134,5 +145,8 @@ for modinfo in pkgutil.iter_modules(location_parsers.__path__):
         continue
 
     logging.info(f"\tParsed {len(locs)} locations")
+
+    if args.ndjson:
+        schema.output_ndjson(locs, place_name.replace(" ", "_"))
 
     locations.find_matches(locs, db, args, place_name, args.address_match)
