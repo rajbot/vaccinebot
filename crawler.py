@@ -76,13 +76,18 @@ if args.webhook_notify:
     if os.environ.get("WEBHOOK_NOTIFY_URL") is None:
         sys.exit("Must set WEBHOOK_NOTIFY_URL env var")
 
+def get_locations():
+    if os.getenv("LOCATIONS_JSON"):
+        fh = open(os.getenv("LOCATIONS_JSON"))
+        return json.load(fh)
 
-logging.info("Downloading known locations from vaccinateca")
-with urllib.request.urlopen(
-    "https://api.vaccinateca.com/v1/locations.json"
-) as response:
-    db = json.load(response)
+    logging.info("Downloading known locations from vaccinateca")
+    with urllib.request.urlopen(
+        "https://api.vaccinateca.com/v1/locations.json"
+    ) as response:
+        return json.load(response)
 
+db = get_locations()
 logging.info(f'loaded {len(db["content"])} locations from vaccinateca')
 
 # Ensure Vaccine Finder matching is always in strict mode
